@@ -1,0 +1,42 @@
+{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1771008912,
+        "narHash": "sha256-gf2AmWVTs8lEq7z/3ZAsgnZDhWIckkb+ZnAo5RzSxJg=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "a82ccc39b39b621151d6732718e3e250109076fa",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "zenpkgs": "zenpkgs"
+      }
+    },
+    "zenpkgs": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1771260040,
+        "narHash": "sha256-7X9EnQaVuzfgawZXf0rYIVRIgn7zA43qUqPZo7vejIs=",
+        "path": "/home/doromiert/Projects/zenpkgs-2",
+        "type": "path"
+      },
+      "original": {
+        "path": "/home/doromiert/Projects/zenpkgs-2",
+        "type": "path"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

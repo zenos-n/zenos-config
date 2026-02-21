@@ -1,0 +1,24 @@
+# FILE: zenos/hosts/debug/host.zcfg
+
+# Module Tests
+users.debug-user = {
+    legacy = {
+        isNormalUser = true;
+        extraGroups = [ "wheel" ];
+        initialPassword = "password";
+        shell = "bash";
+    };
+    
+};
+
+programs = {
+    legacy.git.enable = true;
+};
+
+legacy = {
+  # 1. Changes /etc/os-release and Bootloader labels
+  system.nixos = {
+    distroName = "ZenOS";
+    distroId = "zenos";
+  };
+};
