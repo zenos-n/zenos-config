@@ -2,7 +2,6 @@
   description = "ZenOS - System Configurations";
 
   inputs = {
-    # Update this to your absolute local path
     zenpkgs.url = "path:/home/doromiert/Projects/zenpkgs-2";
   };
 
@@ -11,42 +10,47 @@
     let
       nixpkgs = zenpkgs.inputs.nixpkgs;
       lib = nixpkgs.lib;
+
+      # Passed down via specialArgs so all modules can access flake inputs
       inputs = { inherit nixpkgs zenpkgs self; };
 
-      zenCore = zenpkgs.lib.core { inherit lib inputs; };
+      zenCore = zenpkgs.lib.core;
 
-      # 1. Base Configurations
       nixosConfigurations = zenCore.mkHosts {
         root = ./hosts;
+        specialArgs = {
+          inherit inputs;
+          # Ensure pkgs is NOT defined here
+        };
         modules = [
           zenpkgs.nixosModules.default
+          {
+            # Instruct the module system to build its own pkgs instance,
+            # which safely allows ISO overlays to be merged.
+            nixpkgs.hostPlatform = "x86_64-linux";
+            nixpkgs.overlays = [ zenpkgs.overlays.default ];
+          }
         ];
       };
 
-      # 2. ISO Configuration Generator
-      # Injects the NixOS installation-cd module into a clone of the host config
       mkIso =
         hostConfig:
         hostConfig.extendModules {
           modules = [
             "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
-            # Optional: Speed up ISO build times for testing
             (
               { lib, ... }:
               {
-                isoImage.squashfsCompression = "gzip -Xcompression-level 1";
-                isoImage.isoBaseName = "zenos";
+                image.baseName = lib.mkForce "zenos";
               }
             )
           ];
         };
-
     in
     {
       inherit nixosConfigurations;
 
-      # 3. Expose ISOs as buildable packages
-      # This dynamically creates a `-iso` target for every host in `hosts/`
+      # Correctly mapped to x86_64-linux only
       packages.x86_64-linux = lib.mapAttrs' (
         name: config: lib.nameValuePair "${name}-iso" (mkIso config).config.system.build.isoImage
       ) nixosConfigurations;

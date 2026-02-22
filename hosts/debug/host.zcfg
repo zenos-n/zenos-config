@@ -6,14 +6,19 @@ users.debug-user = {
         isNormalUser = true;
         extraGroups = [ "wheel" ];
         initialPassword = "password";
-        shell = "bash";
     };
-    
+    packages.legacy.jq = true;
+    programs.keepassxc = {
+        theme = "dark";
+        enable = true;
+    };
 };
 
-programs = {
-    legacy.git.enable = true;
+system.programs = {
+    legacy.neovim.enable = true;
 };
+
+desktops.gnome.enable = true;
 
 legacy = {
   # 1. Changes /etc/os-release and Bootloader labels
