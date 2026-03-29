@@ -2,20 +2,13 @@
 
 # Module Tests
 users.debug-user = {
-    legacy = {
-        isNormalUser = true;
-        extraGroups = [ "wheel" ];
-        initialPassword = "password";
-    };
-    packages.legacy.jq = true;
-    programs.keepassxc = {
-        theme = "dark";
-        enable = true;
-    };
-};
+  legacy = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" ];
+    initialPassword = "password";
+  };
+  packages.legacy.jq = true;
 
-system.programs = {
-    legacy.neovim.enable = true;
 };
 
 desktops.gnome.enable = true;
@@ -27,3 +20,4 @@ legacy = {
     distroId = "zenos";
   };
 };
+

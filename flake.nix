@@ -2,8 +2,8 @@
   description = "ZenOS - System Configurations";
 
   inputs = {
-    # zenpkgs.url = "path:/home/doromiert/Projects/zenpkgs-2";
-    zenpkgs.url = "github:zenos-n/zenpkgs";
+    zenpkgs.url = "path:/home/doromiert/Projects/zenpkgs-2";
+    #zenpkgs.url = "github:zenos-n/zenpkgs";
   };
 
   outputs =
