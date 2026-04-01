@@ -4,6 +4,7 @@
   inputs = {
     zenpkgs.url = "path:/home/doromiert/Projects/zenpkgs-2";
     #zenpkgs.url = "github:zenos-n/zenpkgs";
+
   };
 
   outputs =
@@ -40,11 +41,28 @@
           modules = [
             "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
             (
-              { lib, ... }:
+              { lib, pkgs, ... }:
               {
+                environment.systemPackages = [
+                  pkgs.fzf
+                  pkgs.jq
+                  pkgs.parted
+                ];
                 image.baseName = lib.mkForce "zenos";
+
+                environment.etc."iso-config/source".source = self;
+                environment.etc."iso-config/zenpkgs".source = zenpkgs;
+                environment.shellAliases.zen-install = "${pkgs.writeShellScript "zen-install" (
+                  builtins.readFile ./scripts/zen-install.sh
+                )}";
+
+                # systemd-tmpfiles to make it show up at /iso-config
+                systemd.tmpfiles.rules = [
+                  "L+ /iso-config - - - - /etc/iso-config/source"
+                ];
               }
             )
+
           ];
         };
     in

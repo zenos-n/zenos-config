@@ -6,6 +6,7 @@ users.debug-user = {
     isNormalUser = true;
     extraGroups = [ "wheel" ];
     initialPassword = "password";
+    home-manager.home.stateVersion = "26.05";
   };
   packages.legacy.jq = true;
 
