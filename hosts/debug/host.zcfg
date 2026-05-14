@@ -8,8 +8,10 @@ users.debug-user = {
     initialPassword = "password";
     home-manager.home.stateVersion = "26.05";
   };
-  packages.legacy.jq = true;
-
+  packages = {
+    legacy.kitty = true;
+    apps.system.zenos.installer = true;
+  };
 };
 
 desktops.gnome.enable = true;
@@ -21,4 +23,3 @@ legacy = {
     distroId = "zenos";
   };
 };
-
