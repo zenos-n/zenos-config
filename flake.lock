@@ -163,7 +163,7 @@
     "jovian": {
       "inputs": {
         "nix-github-actions": "nix-github-actions",
-        "nixpkgs": "nixpkgs_2"
+        "nixpkgs": "nixpkgs"
       },
       "locked": {
         "lastModified": 1787899316,
@@ -220,7 +220,7 @@
         "flake-compat": "flake-compat",
         "flake-parts": "flake-parts",
         "git-hooks": "git-hooks",
-        "nixpkgs": "nixpkgs_3"
+        "nixpkgs": "nixpkgs_2"
       },
       "locked": {
         "lastModified": 1788064340,
@@ -262,7 +262,7 @@
     "nix-minecraft": {
       "inputs": {
         "flake-compat": "flake-compat_2",
-        "nixpkgs": "nixpkgs_4",
+        "nixpkgs": "nixpkgs_3",
         "systems": "systems"
       },
       "locked": {
@@ -282,7 +282,7 @@
     "nixcord": {
       "inputs": {
         "flake-parts": "flake-parts_2",
-        "nixpkgs": "nixpkgs_5",
+        "nixpkgs": "nixpkgs_4",
         "nixpkgs-nixcord": "nixpkgs-nixcord",
         "treefmt-nix": "treefmt-nix"
       },
@@ -302,7 +302,7 @@
     },
     "nixos-hardware": {
       "inputs": {
-        "nixpkgs": "nixpkgs_6"
+        "nixpkgs": "nixpkgs_5"
       },
       "locked": {
         "lastModified": 1788044418,
@@ -320,16 +320,16 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1788187754,
-        "narHash": "sha256-bu1QxmXKmPuvBLN7bHP355OV9Qo13x9WCiRDH62CqRM=",
+        "lastModified": 1787498568,
+        "narHash": "sha256-9i/VTdusq/+NM/tz+J1Re+ojkMB8MBf0QshnYfzHz30=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "5dfba6236110080a54247d6460bc2ff5dda939cc",
+        "rev": "56c02bc00adcf003215cc4bd996d6efaf4cff188",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
-        "ref": "nixos-26.05",
+        "ref": "nixos-unstable",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -382,22 +382,6 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1787498568,
-        "narHash": "sha256-9i/VTdusq/+NM/tz+J1Re+ojkMB8MBf0QshnYfzHz30=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "56c02bc00adcf003215cc4bd996d6efaf4cff188",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixos-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs_3": {
-      "locked": {
         "lastModified": 1787964612,
         "narHash": "sha256-0N9nghg3nwzX6b6qc77EzjR9cu/Z+UR66FlfsCqiURs=",
         "owner": "NixOS",
@@ -412,7 +396,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_4": {
+    "nixpkgs_3": {
       "locked": {
         "lastModified": 1769461804,
         "narHash": "sha256-msG8SU5WsBUfVVa/9RPLaymvi5bI8edTavbIq3vRlhI=",
@@ -428,7 +412,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_5": {
+    "nixpkgs_4": {
       "locked": {
         "lastModified": 1786711500,
         "narHash": "sha256-QvnceIGTBeDvDd9oCn+GvdsnkquliuwbVgpiRH68qaQ=",
@@ -444,7 +428,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_6": {
+    "nixpkgs_5": {
       "locked": {
         "lastModified": 1767892417,
         "narHash": "sha256-8bW3q88CEg2u4hSP66Vf4lpbLonHz7hqDNBMcCY7E9U=",
@@ -455,6 +439,22 @@
       "original": {
         "type": "tarball",
         "url": "https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz"
+      }
+    },
+    "nixpkgs_6": {
+      "locked": {
+        "lastModified": 1787962033,
+        "narHash": "sha256-u6z9VTZA4Kf3RkHQo9sQI7NI4Ei/uiU9vrMqOiwWP1Y=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "c5c4a43b0e8056328ec4529f735cabdb8f1942bb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-26.05",
+        "repo": "nixpkgs",
+        "type": "github"
       }
     },
     "nixpkgs_7": {
@@ -497,7 +497,6 @@
     },
     "root": {
       "inputs": {
-        "nixpkgs": "nixpkgs",
         "zenpkgs": "zenpkgs"
       }
     },
@@ -606,17 +605,17 @@
     "source-setup": {
       "flake": false,
       "locked": {
-        "lastModified": 1789041335,
-        "narHash": "sha256-w/FhPGJ8hQuTqNMO/4Sfd8j+U+mg35aSAgH1A1HUxeQ=",
+        "lastModified": 1789124858,
+        "narHash": "sha256-o0FX6vZ6RWyjGN4k2xr9lNLaAzAtOnTBAQKIchFQ4+o=",
         "owner": "zenos-n",
         "repo": "zenos-setup",
-        "rev": "e8834849bbc1887bcb0080b4f804191bc7b693e3",
+        "rev": "17050a6e802f7caac55078289eb1f81a5556845d",
         "type": "github"
       },
       "original": {
         "owner": "zenos-n",
         "repo": "zenos-setup",
-        "rev": "e8834849bbc1887bcb0080b4f804191bc7b693e3",
+        "rev": "17050a6e802f7caac55078289eb1f81a5556845d",
         "type": "github"
       }
     },
@@ -642,14 +641,14 @@
       "locked": {
         "lastModified": 1789023675,
         "narHash": "sha256-hvgFhrzDDwE6c9WgAPJ3TwoU0lPjNkzea+Pwo0qLyHE=",
-        "owner": "doromiert",
-        "repo": "ZenFS",
+        "owner": "zenos-n",
+        "repo": "zenfs",
         "rev": "f4ea423b1bd02704ebe385104d994358fa3c1e90",
         "type": "github"
       },
       "original": {
-        "owner": "doromiert",
-        "repo": "ZenFS",
+        "owner": "zenos-n",
+        "repo": "zenfs",
         "rev": "f4ea423b1bd02704ebe385104d994358fa3c1e90",
         "type": "github"
       }
@@ -720,9 +719,7 @@
         "nix-minecraft": "nix-minecraft",
         "nixcord": "nixcord",
         "nixos-hardware": "nixos-hardware",
-        "nixpkgs": [
-          "nixpkgs"
-        ],
+        "nixpkgs": "nixpkgs_6",
         "nur": "nur",
         "source-oobe": "source-oobe",
         "source-plymouth": "source-plymouth",
@@ -736,17 +733,17 @@
         "vsc-extensions": "vsc-extensions"
       },
       "locked": {
-        "lastModified": 1789041459,
-        "narHash": "sha256-eBD7fFjoUxvu6o/TwXChc1m6JEvO0MTI5xVCYAdYtV8=",
+        "lastModified": 1789124979,
+        "narHash": "sha256-K1wnJH3Ds3WAzqYsD2T99OdgcGZj1Xvp3Ka705Zb4Zg=",
         "owner": "zenos-n",
         "repo": "zenpkgs",
-        "rev": "b90abf75591fb3c4700fd1732b345b966ee18d68",
+        "rev": "307dee4a51439b0e1894e1d1e5d25f8d1951390b",
         "type": "github"
       },
       "original": {
         "owner": "zenos-n",
+        "ref": "migration/path-derived-dsl",
         "repo": "zenpkgs",
-        "rev": "b90abf75591fb3c4700fd1732b345b966ee18d68",
         "type": "github"
       }
     }

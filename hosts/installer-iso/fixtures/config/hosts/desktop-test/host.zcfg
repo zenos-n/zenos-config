@@ -1,5 +1,6 @@
+_import "./hardware.zcfg";
 legacy.networking.hostName = "desktop-test";
-legacy.services.desktopManager.gnome.enable = true;
+desktops.gnome.enable = true;
 users.alice.legacy = {
   isNormalUser = true;
   home = "/Users/alice";

@@ -7,3 +7,4 @@ users.alice.legacy = {
   password = "test-only";
   extraGroups = [ "wheel" "networkmanager" ];
 };
+_import "./hardware.zcfg";

@@ -33,8 +33,17 @@ in
 
   users.users.nixos.enable = lib.mkForce false;
   users.users.root.hashedPassword = lib.mkForce "!";
+  users.users.zenos.hashedPassword = lib.mkForce "$y$j9T$OIbmBuFryLyV3lwyAwPGE/$Fjh4vNdRE/ZdotTVv5KYmo8796pnD2oUzf3Wb.n32R5";
   services.getty.autologinUser = lib.mkForce null;
-  services.openssh.enable = lib.mkForce false;
+  services.openssh = {
+    enable = lib.mkForce true;
+    openFirewall = true;
+    settings = {
+      KbdInteractiveAuthentication = false;
+      PasswordAuthentication = true;
+      PermitRootLogin = "no";
+    };
+  };
   nix.settings.trusted-users = [
     "root"
     "zenos"

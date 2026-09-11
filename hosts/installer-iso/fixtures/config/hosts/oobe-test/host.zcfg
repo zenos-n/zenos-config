@@ -1,2 +1,4 @@
+_import "./system.zcfg";
 legacy.networking.hostName = "oobe-test";
-legacy.services.desktopManager.gnome.enable = true;
+desktops.gnome.enable = true;
+_import "./hardware.zcfg";

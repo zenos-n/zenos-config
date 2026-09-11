@@ -2,21 +2,19 @@
   description = "ZenOS host and image compositions";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     zenpkgs = {
-      url = "github:zenos-n/zenpkgs/b90abf75591fb3c4700fd1732b345b966ee18d68";
-      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:zenos-n/zenpkgs/migration/path-derived-dsl";
     };
   };
 
   outputs =
     inputs@{
       self,
-      nixpkgs,
       zenpkgs,
     }:
     let
       system = "x86_64-linux";
+      nixpkgs = zenpkgs.inputs.nixpkgs;
       lib = nixpkgs.lib;
       hostEntries = builtins.readDir ./hosts;
       hostNames = builtins.filter (

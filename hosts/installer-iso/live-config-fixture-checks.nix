@@ -4,7 +4,7 @@ let
   inherit (pkgs) lib;
   fixture = inputs.self // {
     inputs = builtins.removeAttrs inputs [ "self" ];
-    nixosConfigurations.zenos-installer-iso = inputs.nixpkgs.lib.nixosSystem {
+    nixosConfigurations.zenos-installer-iso = inputs.zenpkgs.inputs.nixpkgs.lib.nixosSystem {
       system = pkgs.stdenv.hostPlatform.system;
       specialArgs.installerStage = "live";
       modules = [
@@ -38,7 +38,8 @@ let
           };
           zenos.legacy.networking.extraHosts = "192.0.2.12 fixture.example";
           services.openssh.enable = lib.mkForce false;
-           security.sudo.wheelNeedsPassword = lib.mkOverride 60 false;
+          security.sudo.wheelNeedsPassword = lib.mkOverride 60 false;
+          zenos.system.installed-base.enable = false;
           services.greetd.settings.default_session = {
             command = "${pkgs.coreutils}/bin/true";
             user = "zenos";
@@ -73,19 +74,21 @@ let
     cp ${./fixtures/live-config-values.zcfg} "$out/hosts/zenos-installer/values.zcfg"
     printf '\n_import "values.zcfg";\n' >> "$out/hosts/zenos-installer/host.zcfg"
   '';
-  values = ((import (valuesSeed + "/flake.nix")).outputs {
-    actualImage = fixture // {
-      nixosConfigurations.zenos-installer-iso =
-        fixture.nixosConfigurations.zenos-installer-iso.extendModules {
-          # Isolate atomic package values from the pinned alias runtime's pkgs fixed point.
-          specialArgs.pkgs = import inputs.nixpkgs {
-            system = pkgs.stdenv.hostPlatform.system;
-            overlays = [ inputs.zenpkgs.overlays.default ];
-          };
-        };
-    };
-    inherit (inputs) nixpkgs zenpkgs;
-  }).nixosConfigurations.zenos-installer.config;
+  values =
+    ((import (valuesSeed + "/flake.nix")).outputs {
+      actualImage = fixture // {
+        nixosConfigurations.zenos-installer-iso =
+          fixture.nixosConfigurations.zenos-installer-iso.extendModules
+            {
+              # Isolate atomic package values from the pinned alias runtime's pkgs fixed point.
+              specialArgs.pkgs = import inputs.zenpkgs.inputs.nixpkgs {
+                system = pkgs.stdenv.hostPlatform.system;
+                overlays = [ inputs.zenpkgs.overlays.default ];
+              };
+            };
+      };
+      inherit (inputs) zenpkgs;
+    }).nixosConfigurations.zenos-installer.config;
 in
 assert values.environment.variables.ZENOS_LIVE_FORCE == "local-force";
 assert values.environment.variables.ZENOS_LIVE_NESTED_TRUE == "nested-true";

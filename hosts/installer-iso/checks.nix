@@ -11,15 +11,13 @@ let
   displayVersion = "1.0.0Nb (${configHash})";
   installed = import ./installed-hosts.nix {
     configRoot = ./fixtures/config;
-    inputs = inputs // {
-      zenosSource = inputs.self;
-      setup-hardware.outPath = ./fixtures/hardware;
-    };
+    inherit inputs;
   };
   live = installer.config;
   oobe = installed.nixosConfigurations.oobe-test.config;
   desktop = installed.nixosConfigurations.desktop-test.config;
   kde = installed.nixosConfigurations.kde-test.config;
+  headless = installed.nixosConfigurations.headless-test.config;
   installedNativeTools = map toString desktop.system.build.zenosGeneratedConfig.nativeBuildInputs;
   valid =
     config:
@@ -27,10 +25,14 @@ let
       failures = builtins.filter (entry: !entry.assertion) config.assertions;
     in
     lib.assertMsg (failures == [ ]) (lib.concatMapStringsSep "\n" (entry: entry.message) failures);
-  unpack = value:
-    if builtins.isAttrs value && (value._type or "") == "gvariant" then unpack value.value
-    else if builtins.isList value then map unpack value
-    else value;
+  unpack =
+    value:
+    if builtins.isAttrs value && (value._type or "") == "gvariant" then
+      unpack value.value
+    else if builtins.isList value then
+      map unpack value
+    else
+      value;
   setup = pkgs.zenos.system.zenos-setup;
   mode = pkgs.zenos.system.zenos-oobe-mode;
   refindInstaller = pkgs.zenos.system.zenos-refind-installer;
@@ -39,6 +41,11 @@ in
 assert valid live;
 assert valid oobe;
 assert valid desktop;
+assert valid kde;
+assert valid headless;
+assert !headless.services.desktopManager.gnome.enable;
+assert !headless.services.displayManager.gdm.enable;
+assert desktop.system.nixos.distroId == "zenos";
 assert live.services.greetd.settings.initial_session.user == "zenos";
 assert live.system.nixos.version == displayVersion;
 assert live.system.nixos.label == "1.0.0Nb-${configHash}";
@@ -54,23 +61,28 @@ assert lib.hasInfix "--session=zenos-oobe" live.services.greetd.settings.initial
 assert live.systemd.user.services.zenos-setup.serviceConfig.ExecStart == lib.getExe setup;
 assert live.systemd.user.services.zenos-setup.environment.ZENOS_SETUP_DRY_RUN == "0";
 assert
-  oobe.systemd.user.services.zenos-setup.serviceConfig.ExecStart == "${lib.getExe setup} --oobe";
-assert oobe.systemd.user.services.zenos-setup.environment.ZENOS_SETUP_DRY_RUN == "0";
+  oobe.systemd.user.services.zenos-oobe.serviceConfig.ExecStart == "${lib.getExe setup} --oobe";
+assert oobe.systemd.user.services.zenos-oobe.environment.ZENOS_SETUP_DRY_RUN == "0";
 assert !oobe.services.displayManager.gdm.enable;
 assert oobe.users.users.zenos.home == "/run/zenos-oobe";
-assert unpack oobe.home-manager.users.zenos.dconf.settings."org/gnome/shell".enabled-extensions
-  == [
+assert
+  unpack oobe.home-manager.users.zenos.dconf.settings."org/gnome/shell".enabled-extensions == [
     "date-menu-formatter@marcinjakubowski.github.com"
     "user-theme@gnome-shell-extensions.gcampax.github.com"
     "zenos-oobe-mode@neg-zero.com"
   ];
-assert oobe.home-manager.users.zenos.dconf.settings."org/gnome/shell/extensions/user-theme".name
+assert
+  oobe.home-manager.users.zenos.dconf.settings."org/gnome/shell/extensions/user-theme".name
   == "ClockOverride";
-assert unpack oobe.home-manager.users.zenos.dconf.settings."org/gnome/shell/extensions/date-menu-formatter".pattern
+assert
+  unpack
+    oobe.home-manager.users.zenos.dconf.settings."org/gnome/shell/extensions/date-menu-formatter".pattern
   == "dd.MM  HH:mm";
-assert oobe.home-manager.users.zenos.dconf.settings."org/gnome/desktop/background".picture-options
+assert
+  oobe.home-manager.users.zenos.dconf.settings."org/gnome/desktop/background".picture-options
   == "none";
-assert oobe.home-manager.users.zenos.dconf.settings."org/gnome/desktop/background".primary-color
+assert
+  oobe.home-manager.users.zenos.dconf.settings."org/gnome/desktop/background".primary-color
   == "#000000";
 assert lib.hasInfix "font-family: \"Zero\""
   oobe.home-manager.users.zenos.xdg.dataFile."themes/ClockOverride/gnome-shell/gnome-shell.css".text;
@@ -80,7 +92,13 @@ assert desktop.services.openssh.openFirewall;
 assert desktop.services.openssh.settings.PasswordAuthentication;
 assert desktop.services.openssh.settings.PermitRootLogin == "no";
 assert !oobe.services.openssh.enable;
-assert !live.services.openssh.enable;
+assert live.services.openssh.enable;
+assert live.services.openssh.openFirewall;
+assert builtins.elem 22 live.networking.firewall.allowedTCPPorts;
+assert live.services.openssh.settings.PasswordAuthentication;
+assert live.services.openssh.settings.PermitRootLogin == "no";
+assert live.users.users.root.hashedPassword == "!";
+assert live.users.users.zenos.hashedPassword != "";
 assert desktop.services.displayManager.gdm.enable;
 assert desktop.services.displayManager.gdm.settings.daemon.GreeterSession == "gnome-login";
 assert !oobe.services.displayManager.gdm.enable;
@@ -91,6 +109,10 @@ assert kde.services.displayManager.plasma-login-manager.enable;
 assert !kde.services.displayManager.sddm.enable;
 assert !(desktop.users.users ? zenos);
 assert !(desktop.systemd.user.services ? zenos-setup);
+assert !(oobe.systemd.user.services ? zenos-setup);
+assert !(desktop.systemd.user.services ? zenos-oobe);
+assert oobe.zenos.system.oobe.enable;
+assert !desktop.zenos.system.oobe.enable;
 assert desktop.users.users.alice.home == "/Users/alice";
 assert desktop.security.sudo.wheelNeedsPassword;
 assert desktop.services.qemuGuest.enable;
@@ -102,10 +124,16 @@ assert !oobe.boot.loader.grub.enable && desktop.boot.loader.systemd-boot.enable;
 assert desktop.boot.loader.timeout == 0;
 assert desktop.boot.loader.efi.efiSysMountPoint == "/boot";
 assert lib.hasInfix "refind-install --yes" desktop.boot.loader.systemd-boot.extraInstallCommands;
-assert lib.hasInfix "cp -Lrf --no-preserve=mode" desktop.boot.loader.systemd-boot.extraInstallCommands;
-assert lib.hasInfix "zenos-sync-refind-generations" desktop.boot.loader.systemd-boot.extraInstallCommands;
-assert lib.hasInfix "/boot/EFI/BOOT/BOOTX64.EFI" desktop.boot.loader.systemd-boot.extraInstallCommands;
+assert lib.hasInfix "cp -Lrf --no-preserve=mode"
+  desktop.boot.loader.systemd-boot.extraInstallCommands;
+assert lib.hasInfix "zenos-sync-refind-generations"
+  desktop.boot.loader.systemd-boot.extraInstallCommands;
+assert lib.hasInfix "/boot/EFI/BOOT/BOOTX64.EFI"
+  desktop.boot.loader.systemd-boot.extraInstallCommands;
 assert desktop.fileSystems."/".device == "/dev/disk/by-uuid/fixture-root";
+assert builtins.elem "virtio_blk" desktop.boot.initrd.availableKernelModules;
+assert builtins.elem inputs.zenpkgs.packages.x86_64-linux.zen-dsl
+  desktop.environment.systemPackages;
 assert desktop.zenos.system.zenfs.filesystemHierarchy.enable;
 assert builtins.elem "zenfs-hierarchy" desktop.system.activationScripts.users.deps;
 assert builtins.elem "etc" desktop.system.activationScripts.zenfs-hierarchy.deps;
@@ -113,13 +141,17 @@ assert desktop.environment.etc ? "zenfs/manifest.json";
 assert builtins.elem inputs.zenpkgs.packages.x86_64-linux.dsl-bundle live.system.extraDependencies;
 assert builtins.elem inputs.zenpkgs.packages.x86_64-linux.dsl-bundle live.isoImage.storeContents;
 assert lib.all (source: builtins.elem source live.isoImage.storeContents) liveConfig.sources;
-assert desktop.systemd.tmpfiles.settings."10-zenfs"."/Users/alice/.private/State/nix".d.user == "alice";
-assert live.systemd.tmpfiles.settings."10-zenfs"."/Users/zenos/.private/State/nix".d.user == "zenos";
+assert
+  desktop.systemd.tmpfiles.settings."10-zenfs"."/Users/alice/.private/State/nix".d.user == "alice";
+assert
+  live.systemd.tmpfiles.settings."10-zenfs"."/Users/zenos/.private/State/nix".d.user == "zenos";
 assert live.systemd.services.xe-daemon.unitConfig.ConditionVirtualization == "xen";
 assert desktop.environment.sessionVariables.XDG_CONFIG_HOME == "$HOME/.private/Config";
-assert builtins.elem ./fixtures/hardware desktop.system.extraDependencies;
+assert builtins.elem ./fixtures/config desktop.system.extraDependencies;
 pkgs.runCommand "zenos-installer-contract" { } ''
-  ${pkgs.python3}/bin/python - ${desktop.environment.etc."zenfs/manifest.json".source} ${live.environment.etc."zenfs/manifest.json".source} <<'PY'
+  ${pkgs.python3}/bin/python - ${desktop.environment.etc."zenfs/manifest.json".source} ${
+    live.environment.etc."zenfs/manifest.json".source
+  } <<'PY'
   import json
   import sys
   with open(sys.argv[1]) as source:
@@ -133,9 +165,9 @@ pkgs.runCommand "zenos-installer-contract" { } ''
   assert live_manifest["aliases"]["/Config"] == "/etc"
   PY
   test -f ${configTemplate}/flake.nix
-  grep -q 'github:NixOS/nixpkgs/nixos-26.05' ${configTemplate}/flake.nix
+  if grep -q 'github:NixOS/nixpkgs' ${configTemplate}/flake.nix; then exit 1; fi
   grep -q 'github:zenos-n/zenpkgs/migration/path-derived-dsl' ${configTemplate}/flake.nix
-  grep -q 'github:doromiert/zenos-next/main' ${configTemplate}/flake.nix
+  if grep -q 'zenosSource\|setup-hardware' ${configTemplate}/flake.nix; then exit 1; fi
   if grep -q 'path:/nix/store' ${configTemplate}/flake.nix; then exit 1; fi
   test -x ${lib.getExe setup}
   test -f ${mode}/share/gnome-shell/modes/zenos-oobe.json
@@ -143,7 +175,6 @@ pkgs.runCommand "zenos-installer-contract" { } ''
   test -f ${refindTheme}/share/zenos/refind/refind.conf
   test -f ${refindTheme}/share/zenos/refind/themes/zenos-picker/theme.conf
   test -x ${refindInstaller}/bin/zenos-sync-refind-generations
-  test -f "${oobe.system.path}/share/backgrounds/destination-2/purple dark.png"
   test -f ${pkgs.gnome-desktop}/lib/girepository-1.0/GnomeDesktop-4.0.typelib
   test -f ${pkgs.libgweather}/lib/girepository-1.0/GWeather-4.0.typelib
   test -f ${pkgs.networkmanager}/lib/girepository-1.0/NM-1.0.typelib

@@ -2,8 +2,9 @@
 
 The image and its installed-system template live in `hosts/installer-iso`.
 They import `zenpkgs.nixosModules.default` and use its canonical `zen-dsl`.
-GNOME, login, boot, users, and the temporary session use existing typed NixOS
-options. No public schema or package implementation is added here.
+ZenPkgs owns the public GNOME, installed-base, and OOBE modules, including their
+internal NixOS lowering. This repository composes the live image and supplies
+the installed flake's local discovery and compilation logic.
 
 ## Setup handoff: ready contract
 
@@ -11,30 +12,30 @@ options. No public schema or package implementation is added here.
   `/iso-config-template/flake.nix` before disk work and copies it to
   `/mnt/etc/ZenOS/flake.nix`. It generates `hosts/<host>/host.zcfg` and its ZCFG
   imports, not `host.nix`. The template compiles them into the Nix store.
-- The template contains `inputs.setup-hardware`, with
-  `url = "path:@ZENOS_SETUP_HARDWARE@"` and `flake = false`. The placeholder
-  occurs exactly once. Setup substitutes an immutable store directory containing
-  `hardware-configuration.nix` and `detection.json`, produced privately with
-  `nix store add-path --name zenos-setup-hardware`. The editable `hardware.json`
-  records version 1, `storePath`, and the hardware Nix SHA-256. Keep this input
-  when OOBE renames the host. The template checks the metadata checksum against
-  the imported hardware and retains both the input and the original named path:
-  Nix may rename the input to `-source`, but Setup still uses `storePath` in OOBE.
-  No hardware Nix belongs in `/Config/ZenOS`.
+- The installed template contains only the `zenpkgs` input. It owns host
+  discovery and compilation in its generated `flake.nix`. Each `host.zcfg`
+  includes `_import "./hardware.zcfg";`. No hardware Nix, hardware input,
+  hardware JSON, or OOBE JSON is consumed. `flake.nix` is the only editable Nix
+  file; installed defaults and runtime support come from ZenPkgs.
 - Hardware includes filesystems for manual partition selection. For automatic
   partitioning, `drives.zcfg` supplies the disk layout and hardware detection
-  must use `--no-filesystems`. Root and a FAT ESP mounted at `/boot` are required.
-  The installed system uses removable-path UEFI GRUB, without NVRAM writes.
-- Only a parsed version-3 `hosts/<host>/oobe.json` with `status = "pending"`
-  and matching `temporaryHost` enables temporary GNOME, greetd autologin as
-  `zenos`, and `zenos-setup --oobe`. Invalid versions and mismatched pending
-  hosts fail evaluation. Absent or complete markers do not enable OOBE.
-  Setup owns artifact checksum validation and rollback. Its pending marker
-  records `graphics.zcfg`, `hardware.json`, and optional `drives.zcfg` hashes.
-  Publish the final host without a pending marker before evaluating its boot
-  generation; remove the old temporary host only after a successful rebuild.
+  must omit filesystem assignments from `hardware.zcfg`. Root and a FAT ESP
+  mounted at `/boot` are required. The installed system uses systemd-boot
+  generation files behind the restored rEFInd picker, with GRUB and NVRAM
+  writes disabled. The pinned legacy rEFInd resource tree and generation sync
+  script are unchanged; firmware fallback resources go under `EFI/BOOT`.
+- The temporary host enables OOBE declaratively with
+  `system.oobe.enable = true` in zcfg. The final host omits that assignment;
+  ZenPkgs gates OOBE behavior on the evaluated module option. Import names,
+  formatting, comments, and unrelated `enable = true` assignments do not select
+  a stage. There is no `installerStage` argument in the installed flake.
+  Setup publishes the final host and removes the temporary host only after a
+  successful boot-generation rebuild. Setup's finalization JSON records support
+  cleanup retries only; they do not select OOBE or contain hardware configuration.
 - The live session is `zenos-oobe`, but launches `zenos-setup` without `--oobe`.
-  Both temporary stages set `ZENOS_SETUP_DRY_RUN=0`. Starting the app must not
+  Installed OOBE has exactly one Setup service, `zenos-oobe`, running
+  `zenos-setup --oobe`. Both Setup services set `ZENOS_SETUP_DRY_RUN=0` directly
+  in their service environment. Starting the app must not
   install anything: partitioning and installation wait for the user's clicks.
 - Setup comes only from `pkgs.zenos.system.zenos-setup`; the GNOME mode comes
   only from `pkgs.zenos.system.zenos-oobe-mode`. Setup must export
@@ -45,6 +46,9 @@ options. No public schema or package implementation is added here.
 - The installed composition does not select GNOME, force its public enable
   option off, or add GNOME applications against the user's selections. GNOME,
   other desktops, and no-desktop choices come from Setup's generated ZCFG.
+  `desktops.gnome.enable = true` owns GDM and its `gnome-login` greeter session.
+  OOBE temporarily overrides display managers and autologin in favor of greetd;
+  its account, services, and login overrides disappear when the option is absent.
   Permanent users use `users.<name>.legacy`, UID 1000 for Setup's first user,
   and `/Users/<name>` homes. The hostname comes from
   `legacy.networking.hostName`. Packages use full-path boolean selectors.
@@ -56,11 +60,9 @@ options. No public schema or package implementation is added here.
 - `/Config` is a symlink to `/etc`; XDG config/data/cache/state point to
   `$HOME/.private/{Config,Packages,Live,State}`. The composition creates those
   directories for normal users. It does not implement the rest of ZenFS.
-- All input sources are pinned to retained Nix store paths, including transitive
-  ZenPkgs inputs and the composition source. The runner locks offline after
-  replacing the hardware input. Installed generations retain those sources and
-  hardware. This retains source closures, not every unbuilt package; package
-  builds can still require network access.
+- ZenPkgs owns Nixpkgs and its other upstream inputs. The installed flake retains
+  the generated zcfg tree, local hardware output, and the ZenPkgs dependency
+  closure.
 
 ## Canonical user sources
 
@@ -84,7 +86,8 @@ checks.x86_64-linux.installer-contract
 checks.x86_64-linux.repository-structure
 ```
 
-Build and evaluate only in the ZenOS VM. Use a private snapshot below `/tmp`
+Focused evaluation may run locally; runtime and installation acceptance must
+run only in the ZenOS VM. Use a private snapshot below `/tmp`
 and `path:` flake references so untracked composition files are included.
 The final ZenPkgs commit and lock update belong to the integration owner after
 the two packages are published. Until then, use `--override-input zenpkgs
@@ -94,18 +97,20 @@ After building `packages.x86_64-linux.config-template` in the VM, run:
 
 ```sh
 python3 hosts/installer-iso/test-template.py /nix/store/<template-output>
-python3 hosts/installer-iso/test-template.py /nix/store/<template-output> --setup-source /tmp/<setup-snapshot>
+python3 hosts/installer-iso/test-template.py /nix/store/<template-output> --zenpkgs-source /tmp/<zenpkgs-snapshot>
+python3 hosts/installer-iso/test-template.py /nix/store/<template-output> --zenpkgs-source /tmp/<zenpkgs-snapshot> --setup-source /tmp/<setup-snapshot>
 ```
 
-This only evaluates private fixtures. It checks offline store-only inputs,
-private hardware metadata, checked/parsed ZCFG, XDG defaults, desktop choices,
-and version-3 marker transitions without installing or activating a system.
+This only evaluates private fixtures. It checks the single root input, offline
+reevaluation, imported hardware ZCFG, checked/parsed compiler output, XDG
+defaults, desktop choices, nested/imported OOBE syntax, misleading comments,
+and removal of the temporary option without installing or activating a system.
 The optional source argument exercises the external Setup generator's actual
 automatic-disk and account output. No Setup package is mocked by these tests.
 `installer-contract` also checks package
 contents and the live/OOBE commands, and therefore needs the two public packages.
 
 The manual acceptance run is live app -> short install -> reboot -> OOBE ->
-permanent desktop. Check the session, app log, `/boot` loader, private hardware
-input, and absence of generated Nix under `/Config/ZenOS` at each installed
+permanent desktop. Check the session, app log, `/boot` loader, imported hardware
+ZCFG, and absence of generated Nix under `/Config/ZenOS` at each installed
 stage. This task does not boot the ISO or perform those disk operations.

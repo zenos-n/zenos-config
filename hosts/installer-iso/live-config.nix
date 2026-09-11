@@ -24,11 +24,22 @@ let
   };
   home = base.home-manager.users.zenos;
   desktopValues = lib.optionalAttrs (desktopSource != null) (
-    lib.mapAttrs' (key: value: lib.nameValuePair
-      "dconf.settings.\"org/gnome/desktop/interface\".\"${key}\"" value)
-      (lib.getAttrs [ "accent-color" "color-scheme" "cursor-size" "cursor-theme"
-        "font-name" "document-font-name" "monospace-font-name" "gtk-theme" "icon-theme"
-        "show-battery-percentage" ] home.dconf.settings."org/gnome/desktop/interface")
+    lib.mapAttrs'
+      (key: value: lib.nameValuePair "dconf.settings.\"org/gnome/desktop/interface\".\"${key}\"" value)
+      (
+        lib.getAttrs [
+          "accent-color"
+          "color-scheme"
+          "cursor-size"
+          "cursor-theme"
+          "font-name"
+          "document-font-name"
+          "monospace-font-name"
+          "gtk-theme"
+          "icon-theme"
+          "show-battery-percentage"
+        ] home.dconf.settings."org/gnome/desktop/interface"
+      )
     // {
       "gtk.font.name" = home.gtk.font.name;
       "gtk.font.size" = home.gtk.font.size;
@@ -38,50 +49,62 @@ let
       "gtk.cursorTheme.size" = home.gtk.cursorTheme.size;
     }
   );
-  assignments = prefix: values: lib.concatStringsSep "\n"
-    (lib.mapAttrsToList (path: value: "${prefix}.${path} = ${builtins.toJSON value};") values);
+  assignments =
+    prefix: values:
+    lib.concatStringsSep "\n" (
+      lib.mapAttrsToList (path: value: "${prefix}.${path} = ${builtins.toJSON value};") values
+    );
   tuningSource = pkgs.writeText "zenos-live-system.zcfg" ''
     # Selected effective image defaults. Edit these values, then rebuild.
     # Boot, hardware, live login and installer restrictions remain in the base.
     ${assignments "legacy" tuning}
   '';
-  desktop = pkgs.writeText "zenos-live-desktop.zcfg" (lib.optionalString (desktopSource != null) ''
-    ${builtins.readFile desktopSource}
+  desktop = pkgs.writeText "zenos-live-desktop.zcfg" (
+    lib.optionalString (desktopSource != null) ''
+      ${builtins.readFile desktopSource}
 
-    # User interface defaults from the image's appearance backend.
-    # GNOME dconf and GTK font/theme names are separate settings; edit both.
-    ${assignments "users.zenos.legacy.homeManager" desktopValues}
-  '');
+      # User interface defaults from the image's appearance backend.
+      # GNOME dconf and GTK font/theme names are separate settings; edit both.
+      ${assignments "users.zenos.legacy.homeManager" desktopValues}
+    ''
+  );
   # Reference paths must not make reading this report build every listed package.
-  snapshot = (pkgs.formats.json { }).generate "zenos-live-base-effective.json"
-    (builtins.fromJSON (builtins.unsafeDiscardStringContext (builtins.toJSON {
-    description = "Selected original image settings, not an editable or complete NixOS dump. Never imported.";
-    sources = {
-      image = "${inputs.self.outPath}/hosts/installer-iso/image.nix";
-      system = "${inputs.self.outPath}/hosts/installer-iso/system.nix";
-      appearance = "${inputs.self.outPath}/hosts/installer-iso/appearance.nix";
-      zenpkgs = toString inputs.zenpkgs.outPath;
-    };
-    identity = { inherit (base.system.nixos) distroId distroName variant_id; };
-    inherit tuning desktopValues;
-    packages = map (package: { name = lib.getName package; storePath = toString package; })
-      base.environment.systemPackages;
-    users = lib.mapAttrs (_: user: {
-      inherit (user) home isNormalUser extraGroups;
-    }) (lib.filterAttrs (_: user: user.isNormalUser) base.users.users);
-    services = {
-      networkmanager = base.networking.networkmanager.enable;
-      openssh = base.services.openssh.enable;
-      pipewire = base.services.pipewire.enable;
-      greetd = base.services.greetd.enable;
-      gnome = base.services.desktopManager.gnome.enable;
-    };
-    boot = {
-      inherit (base.boot) kernelParams supportedFilesystems;
-      kernel = toString base.boot.kernelPackages.kernel;
-      filesystems = lib.mapAttrs (_: fs: { inherit (fs) device fsType options; }) base.fileSystems;
-    };
-  })));
+  snapshot = (pkgs.formats.json { }).generate "zenos-live-base-effective.json" (
+    builtins.fromJSON (
+      builtins.unsafeDiscardStringContext (
+        builtins.toJSON {
+          description = "Selected original image settings, not an editable or complete NixOS dump. Never imported.";
+          sources = {
+            image = "${inputs.self.outPath}/hosts/installer-iso/image.nix";
+            system = "${inputs.self.outPath}/hosts/installer-iso/system.nix";
+            appearance = "${inputs.self.outPath}/hosts/installer-iso/appearance.nix";
+            zenpkgs = toString inputs.zenpkgs.outPath;
+          };
+          identity = { inherit (base.system.nixos) distroId distroName variant_id; };
+          inherit tuning desktopValues;
+          packages = map (package: {
+            name = lib.getName package;
+            storePath = toString package;
+          }) base.environment.systemPackages;
+          users = lib.mapAttrs (_: user: {
+            inherit (user) home isNormalUser extraGroups;
+          }) (lib.filterAttrs (_: user: user.isNormalUser) base.users.users);
+          services = {
+            networkmanager = base.networking.networkmanager.enable;
+            openssh = base.services.openssh.enable;
+            pipewire = base.services.pipewire.enable;
+            greetd = base.services.greetd.enable;
+            gnome = base.services.desktopManager.gnome.enable;
+          };
+          boot = {
+            inherit (base.boot) kernelParams supportedFilesystems;
+            kernel = toString base.boot.kernelPackages.kernel;
+            filesystems = lib.mapAttrs (_: fs: { inherit (fs) device fsType options; }) base.fileSystems;
+          };
+        }
+      )
+    )
+  );
   pin =
     input:
     {
@@ -106,7 +129,6 @@ let
       url = "path:${inputs.self.outPath}";
       inputs = builtins.mapAttrs (_: pin) (builtins.removeAttrs inputs [ "self" ]);
     };
-    nixpkgs.follows = "actualImage/nixpkgs";
     zenpkgs.follows = "actualImage/zenpkgs";
   };
   flake = pkgs.writeText "zenos-live-flake.nix" ''
@@ -116,7 +138,7 @@ let
       outputs = inputs:
         let
           system = ${builtins.toJSON system};
-          pkgs = import inputs.nixpkgs { inherit system; };
+          pkgs = import inputs.zenpkgs.inputs.nixpkgs { inherit system; };
           sourcesRoot = ./.;
           generated = pkgs.runCommand "zenos-live-${hostName}.nix" {
             nativeBuildInputs = [ inputs.zenpkgs.packages.''${system}.zen-dsl (pkgs.lib.getBin pkgs.nix) ];
@@ -194,13 +216,13 @@ let
     - `hosts/${hostName}/system.zcfg`: locale, timezone, console keyboard, firmware
       updates, SSD trimming, compressed swap and Nix garbage collection defaults.
     ${lib.optionalString (desktopSource != null) ''
-    - `hosts/${hostName}/desktop.zcfg`: the actual authored image appearance source,
-      including dock, extensions, animation values, fonts and theme packages;
-      followed by the actual user's GNOME/GTK font, cursor and theme defaults.
-      For example, change `notification-timeout.timeout = 2000` to `3500`.
-      GNOME interface settings at the bottom control the live user's theme/font;
-      update corresponding GTK values too. Package selections and activation are
-      separate: disabling an extension does not necessarily remove its package.
+      - `hosts/${hostName}/desktop.zcfg`: the actual authored image appearance source,
+        including dock, extensions, animation values, fonts and theme packages;
+        followed by the actual user's GNOME/GTK font, cursor and theme defaults.
+        For example, change `notification-timeout.timeout = 2000` to `3500`.
+        GNOME interface settings at the bottom control the live user's theme/font;
+        update corresponding GTK values too. Package selections and activation are
+        separate: disabling an extension does not necessarily remove its package.
     ''}
     - `base-effective.json`: readable selected original settings, package names
       and exact store identities, normal-user homes/groups, services and boot.
@@ -219,7 +241,7 @@ let
     users, boot integration, session and Setup. `hosts/installer-iso/appearance.nix`
     owns the remaining appearance backend; `appearance.zcfg` is shared with the
     editable desktop copy. Upstream modules/packages come from the pinned
-    `${inputs.zenpkgs.outPath}` and `${inputs.nixpkgs.outPath}` sources.
+    `${inputs.zenpkgs.outPath}` and `${inputs.zenpkgs.inputs.nixpkgs.outPath}` sources.
     These backend sources stay in the store, not editable Nix files under /Config.
     The live base is retained, including its forced login/media restrictions.
 
@@ -267,7 +289,9 @@ assert lib.assertMsg (
     cp ${readme} "$out/README.md"
     cp ${snapshot} "$out/base-effective.json"
     cp ${tuningSource} "$out/hosts/${hostName}/system.zcfg"
-    ${lib.optionalString (desktopSource != null) ''cp ${desktop} "$out/hosts/${hostName}/desktop.zcfg"''}
+    ${lib.optionalString (
+      desktopSource != null
+    ) ''cp ${desktop} "$out/hosts/${hostName}/desktop.zcfg"''}
     cat > "$out/hosts/${hostName}/host.zcfg" <<'ZCFG'
     # Local additions to the frozen actual live image, using the current DSL.
     legacy.networking.hostName = ${builtins.toJSON hostName};

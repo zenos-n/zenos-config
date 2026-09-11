@@ -12,7 +12,7 @@ let
     root:
     ((import (root + "/flake.nix")).outputs {
       actualImage = inputs.self;
-      inherit (inputs) nixpkgs zenpkgs;
+      inherit (inputs) zenpkgs;
     }).nixosConfigurations.zenos-installer.config;
   live = evaluate seed;
   edited = pkgs.runCommand "zenos-live-config-edited-fixture" { } ''
@@ -36,16 +36,21 @@ let
   desktopChanged = evaluate desktopEdited;
   desktopSettings = config: config.home-manager.users.zenos.dconf.settings;
   gvariant = import "${inputs.zenpkgs.inputs.home-manager}/modules/lib/gvariant.nix" { inherit lib; };
-  encodedSettings = config: lib.mapAttrs (_: lib.mapAttrs (_: value:
-    toString (gvariant.mkValue value))) (desktopSettings config);
+  encodedSettings =
+    config:
+    lib.mapAttrs (_: lib.mapAttrs (_: value: toString (gvariant.mkValue value))) (
+      desktopSettings config
+    );
   packageIds = config: map toString config.environment.systemPackages;
-  report = builtins.fromJSON (builtins.unsafeDiscardStringContext
-    (builtins.readFile (seed + "/base-effective.json")));
+  report = builtins.fromJSON (
+    builtins.unsafeDiscardStringContext (builtins.readFile (seed + "/base-effective.json"))
+  );
   generated = live.system.build.zenosGeneratedConfig;
-  exported = ((import (seed + "/flake.nix")).outputs {
-    actualImage = inputs.self;
-    inherit (inputs) nixpkgs zenpkgs;
-  }).packages.${pkgs.stdenv.hostPlatform.system}.generated-host;
+  exported =
+    ((import (seed + "/flake.nix")).outputs {
+      actualImage = inputs.self;
+      inherit (inputs) zenpkgs;
+    }).packages.${pkgs.stdenv.hostPlatform.system}.generated-host;
   nativeTools = map toString generated.nativeBuildInputs;
   pinned = (import (seed + "/flake.nix")).inputs;
   retained = map toString live.system.extraDependencies;
@@ -58,6 +63,7 @@ let
 in
 assert pinned.actualImage.url == "path:${inputs.self.outPath}";
 assert !(pinned ? setup-hardware);
+assert !(pinned ? nixpkgs);
 assert pinned.zenpkgs.follows == "actualImage/zenpkgs";
 assert generated == exported;
 assert live.networking.hostName == original.networking.hostName;
@@ -76,8 +82,11 @@ assert live.fonts.fontconfig.defaultFonts == original.fonts.fontconfig.defaultFo
 assert live.fonts.packages == original.fonts.packages;
 assert desktopSource == null || encodedSettings live == encodedSettings original;
 assert desktopSource == null || live.zenos.desktops.gnome == original.zenos.desktops.gnome;
-assert desktopSource == null || lib.hasPrefix (builtins.readFile desktopSource)
-  (lib.trim (builtins.readFile (seed + "/hosts/zenos-installer/desktop.zcfg")));
+assert
+  desktopSource == null
+  || lib.hasPrefix (builtins.readFile desktopSource) (
+    lib.trim (builtins.readFile (seed + "/hosts/zenos-installer/desktop.zcfg"))
+  );
 assert
   live.systemd.user.services.zenos-setup.serviceConfig.ExecStart
   == original.systemd.user.services.zenos-setup.serviceConfig.ExecStart;
@@ -87,7 +96,7 @@ assert !original.security.sudo.wheelNeedsPassword;
 # Installation-media priority 60 remains stronger than local edits at 90.
 assert changed.security.sudo.wheelNeedsPassword == original.security.sudo.wheelNeedsPassword;
 assert changed.networking.networkmanager.enable == original.networking.networkmanager.enable;
-assert !changed.services.openssh.enable;
+assert changed.services.openssh.enable == original.services.openssh.enable;
 assert changed.networking.firewall.allowedTCPPorts == [ 443 ];
 assert changed.networking.extraHosts == original.networking.extraHosts;
 assert changed.system.name == original.system.name;
@@ -103,21 +112,27 @@ assert !lib.elem (toString (lib.getDev pkgs.nix)) nativeTools;
 assert lib.all (source: builtins.elem (toString source) retained) liveConfig.sources;
 assert valid live;
 assert valid changed;
-assert desktopSource == null || (
-  desktopChanged.zenos.desktops.gnome.extensions.notification-timeout.timeout == 3500
-  && (encodedSettings desktopChanged)."org/gnome/shell/extensions/notification-timeout".timeout == "3500"
-  && (desktopSettings desktopChanged)."org/gnome/desktop/interface".font-name == "Atkinson Hyperlegible 13"
-  && !desktopChanged.services.fstrim.enable
-  && desktopChanged.services.desktopManager.gnome.enable
-  && desktopChanged.hardware.graphics.enable == original.hardware.graphics.enable
-  && desktopChanged.boot.kernelParams == original.boot.kernelParams
-  && desktopChanged.fileSystems == original.fileSystems
-  && desktopChanged.services.greetd.settings == original.services.greetd.settings
-  && desktopChanged.system.nixos == original.system.nixos
-  && packageIds desktopChanged == packageIds original
-  && (encodedSettings desktopChanged)."org/gnome/shell" == (encodedSettings original)."org/gnome/shell"
-  && valid desktopChanged
-);
+assert
+  desktopSource == null
+  || (
+    desktopChanged.zenos.desktops.gnome.extensions.notification-timeout.timeout == 3500
+    &&
+      (encodedSettings desktopChanged)."org/gnome/shell/extensions/notification-timeout".timeout == "3500"
+    &&
+      (desktopSettings desktopChanged)."org/gnome/desktop/interface".font-name
+      == "Atkinson Hyperlegible 13"
+    && !desktopChanged.services.fstrim.enable
+    && desktopChanged.services.desktopManager.gnome.enable
+    && desktopChanged.hardware.graphics.enable == original.hardware.graphics.enable
+    && desktopChanged.boot.kernelParams == original.boot.kernelParams
+    && desktopChanged.fileSystems == original.fileSystems
+    && desktopChanged.services.greetd.settings == original.services.greetd.settings
+    && desktopChanged.system.nixos == original.system.nixos
+    && packageIds desktopChanged == packageIds original
+    &&
+      (encodedSettings desktopChanged)."org/gnome/shell" == (encodedSettings original)."org/gnome/shell"
+    && valid desktopChanged
+  );
 pkgs.runCommand "zenos-live-config-contract" { } ''
   test -f ${seed}/flake.nix
   test -s ${seed}/README.md
