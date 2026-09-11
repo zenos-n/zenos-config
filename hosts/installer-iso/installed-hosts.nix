@@ -8,6 +8,12 @@ let
     inherit system;
     overlays = [ zenpkgs.overlays.default ];
   };
+  bootHooks = import (zenpkgs + "/lib/installer-boot.nix") {
+    inherit pkgs lib;
+    bootPackage = pkgs.zenos.theming.system.zenos-plymouth;
+    refindInstaller = pkgs.zenos.system.zenos-refind-installer;
+    refindTheme = pkgs.zenos.theming.system.zenos-refind-theme;
+  };
   entries = builtins.readDir (configRoot + "/hosts");
   sources =
     input: [ input.outPath ] ++ lib.concatMap sources (builtins.attrValues (input.inputs or { }));
@@ -42,6 +48,8 @@ in
       inherit system;
       modules = [
         zenpkgs.nixosModules.default
+        bootHooks.common
+        bootHooks.installed
         (import generated)
         {
           system.build.zenosGeneratedConfig = generated;
