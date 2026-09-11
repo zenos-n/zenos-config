@@ -196,6 +196,11 @@ in
     mode.src
   ];
   environment.pathsToLink = [
+    "/bin"
+    "/sbin"
+    "/lib"
+    "/libexec"
+    "/share"
     "/share/gnome-shell/extensions"
     "/share/gnome-shell/modes"
   ];
