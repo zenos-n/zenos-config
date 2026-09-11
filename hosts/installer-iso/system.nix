@@ -7,8 +7,12 @@
 }:
 let
   releaseVersion = "1.0.0Nb";
-  configHash = builtins.substring 0 7 (builtins.hashString "sha256" inputs.zenpkgs.sourceInfo.narHash);
-  displayVersion = "${releaseVersion} (${configHash})";
+  zenpkgsRevision =
+    inputs.zenpkgs.sourceInfo.rev
+      or inputs.zenpkgs.sourceInfo.dirtyRev
+      or (throw "ZenPkgs input must provide a Git revision for ZenOS versioning");
+  zenpkgsHash = builtins.substring 0 7 zenpkgsRevision;
+  displayVersion = "${releaseVersion} (${zenpkgsHash})";
   setup = pkgs.zenos.system.zenos-setup;
   mode = pkgs.zenos.system.zenos-oobe-mode;
   sessionCommand = "${pkgs.coreutils}/bin/env XDG_SESSION_TYPE=wayland XDG_SESSION_CLASS=user XDG_SESSION_DESKTOP=GNOME XDG_CURRENT_DESKTOP=GNOME ZENOS_OOBE=1 ${config.services.displayManager.sessionData.wrapper} ${pkgs.gnome-session}/bin/gnome-session --session=zenos-oobe";
@@ -41,11 +45,11 @@ in
     distroName = "ZenOS";
     version = displayVersion;
     versionSuffix = "";
-    label = "${releaseVersion}-${configHash}";
+    label = "${releaseVersion}-${zenpkgsHash}";
     vendorId = "zenos";
     vendorName = "ZenOS";
     extraOSReleaseArgs = {
-      BUILD_ID = "${releaseVersion}-${configHash}";
+      BUILD_ID = "${releaseVersion}-${zenpkgsHash}";
       CPE_NAME = "cpe:/o:zenos:zenos:${releaseVersion}";
       LOGO = "zenos";
       VERSION = displayVersion;
@@ -60,9 +64,9 @@ in
   };
   system.image = {
     id = "zenos-installer";
-    version = "${releaseVersion}-${configHash}";
+    version = "${releaseVersion}-${zenpkgsHash}";
   };
-  system.configurationRevision = configHash;
+  system.configurationRevision = zenpkgsHash;
   nix.settings.experimental-features = [
     "nix-command"
     "flakes"

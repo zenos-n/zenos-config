@@ -7,12 +7,7 @@ let
   pkgs = import nixpkgs {
     inherit system;
     overlays = [ zenpkgs.overlays.default ];
-  };
-  bootHooks = import (zenpkgs + "/lib/installer-boot.nix") {
-    inherit pkgs lib;
-    bootPackage = pkgs.zenos.theming.system.zenos-plymouth;
-    refindInstaller = pkgs.zenos.system.zenos-refind-installer;
-    refindTheme = pkgs.zenos.theming.system.zenos-refind-theme;
+    config.allowUnfree = true;
   };
   entries = builtins.readDir (configRoot + "/hosts");
   sources =
@@ -48,10 +43,9 @@ in
       inherit system;
       modules = [
         zenpkgs.nixosModules.default
-        bootHooks.common
-        bootHooks.installed
         (import generated)
         {
+          nixpkgs.config.allowUnfree = true;
           system.build.zenosGeneratedConfig = generated;
           system.extraDependencies = [
             configRoot

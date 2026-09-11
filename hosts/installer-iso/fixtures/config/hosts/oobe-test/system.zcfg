@@ -1,1 +1,1 @@
-system.oobe.enable = true;
+system.oobeMode = true;

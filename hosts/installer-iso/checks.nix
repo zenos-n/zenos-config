@@ -7,8 +7,12 @@
 }:
 let
   inherit (pkgs) lib;
-  configHash = builtins.substring 0 7 (builtins.hashString "sha256" inputs.zenpkgs.sourceInfo.narHash);
-  displayVersion = "1.0.0Nb (${configHash})";
+  zenpkgsRevision =
+    inputs.zenpkgs.sourceInfo.rev
+      or inputs.zenpkgs.sourceInfo.dirtyRev
+      or (throw "ZenPkgs input must provide a Git revision for ZenOS versioning");
+  zenpkgsHash = builtins.substring 0 7 zenpkgsRevision;
+  displayVersion = "1.0.0Nb (${zenpkgsHash})";
   installed = import ./installed-hosts.nix {
     configRoot = ./fixtures/config;
     inherit inputs;
@@ -48,15 +52,15 @@ assert !headless.services.displayManager.gdm.enable;
 assert desktop.system.nixos.distroId == "zenos";
 assert live.services.greetd.settings.initial_session.user == "zenos";
 assert live.system.nixos.version == displayVersion;
-assert live.system.nixos.label == "1.0.0Nb-${configHash}";
+assert live.system.nixos.label == "1.0.0Nb-${zenpkgsHash}";
 assert live.system.nixos.versionSuffix == "";
-assert live.system.nixos.extraOSReleaseArgs.BUILD_ID == "1.0.0Nb-${configHash}";
+assert live.system.nixos.extraOSReleaseArgs.BUILD_ID == "1.0.0Nb-${zenpkgsHash}";
 assert live.system.nixos.extraOSReleaseArgs.CPE_NAME == "cpe:/o:zenos:zenos:1.0.0Nb";
 assert live.system.nixos.extraOSReleaseArgs.LOGO == "zenos";
 assert live.system.nixos.extraLSBReleaseArgs.DISTRIB_RELEASE == "1.0.0Nb";
 assert live.system.image.id == "zenos-installer";
-assert live.system.image.version == "1.0.0Nb-${configHash}";
-assert live.system.configurationRevision == configHash;
+assert live.system.image.version == "1.0.0Nb-${zenpkgsHash}";
+assert live.system.configurationRevision == zenpkgsHash;
 assert lib.hasInfix "--session=zenos-oobe" live.services.greetd.settings.initial_session.command;
 assert live.systemd.user.services.zenos-setup.serviceConfig.ExecStart == lib.getExe setup;
 assert live.systemd.user.services.zenos-setup.environment.ZENOS_SETUP_DRY_RUN == "0";
@@ -111,8 +115,8 @@ assert !(desktop.users.users ? zenos);
 assert !(desktop.systemd.user.services ? zenos-setup);
 assert !(oobe.systemd.user.services ? zenos-setup);
 assert !(desktop.systemd.user.services ? zenos-oobe);
-assert oobe.zenos.system.oobe.enable;
-assert !desktop.zenos.system.oobe.enable;
+assert oobe.zenos.system.oobeMode;
+assert !desktop.zenos.system.oobeMode;
 assert desktop.users.users.alice.home == "/Users/alice";
 assert desktop.security.sudo.wheelNeedsPassword;
 assert desktop.services.qemuGuest.enable;

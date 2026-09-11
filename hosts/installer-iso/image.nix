@@ -8,12 +8,16 @@
   ...
 }:
 let
-  configHash = builtins.substring 0 7 (builtins.hashString "sha256" inputs.zenpkgs.sourceInfo.narHash);
+  zenpkgsRevision =
+    inputs.zenpkgs.sourceInfo.rev
+      or inputs.zenpkgs.sourceInfo.dirtyRev
+      or (throw "ZenPkgs input must provide a Git revision for ZenOS versioning");
+  zenpkgsHash = builtins.substring 0 7 zenpkgsRevision;
   bootHooks = import (inputs.zenpkgs + "/lib/installer-boot.nix") {
     inherit pkgs lib;
     bootPackage = pkgs.zenos.theming.system.zenos-plymouth.override {
       distroName = "ZenOS";
-      releaseVersion = "1.0.0Nb (${configHash})";
+      releaseVersion = "1.0.0Nb (${zenpkgsHash})";
       deviceName = "ZenOS Installer";
     };
     refindInstaller = pkgs.zenos.system.zenos-refind-installer;

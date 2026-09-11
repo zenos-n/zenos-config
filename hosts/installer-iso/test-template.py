@@ -81,7 +81,7 @@ def main():
           temporaryUser = c.users.users ? zenos;
           setupService = c.systemd.user.services ? zenos-oobe;
           liveService = c.systemd.user.services ? zenos-setup;
-          oobe = c.zenos.system.oobe.enable;
+          oobe = c.zenos.system.oobeMode;
           failures = map (a: a.message) (builtins.filter (a: !a.assertion) c.assertions);
           root = c.fileSystems."/".device;
           esp = c.boot.loader.efi.efiSysMountPoint;
@@ -112,8 +112,8 @@ def main():
         desktop_drv = evaluate("desktop-test", "c: c.system.build.toplevel.drvPath")
         assert desktop_drv.startswith("/nix/store/") and desktop_drv.endswith(".drv")
 
-        assert evaluate("oobe-test", "c: c.zenos.system.oobe.enable")
-        assert not evaluate("desktop-test", "c: c.zenos.system.oobe.enable")
+        assert evaluate("oobe-test", "c: c.zenos.system.oobeMode")
+        assert not evaluate("desktop-test", "c: c.zenos.system.oobeMode")
         # Same evaluated option through nested spelling and a differently named import.
         (pending_dir / "system.zcfg").write_text('_import "./phase.zcfg";\n')
         (pending_dir / "phase.zcfg").write_text("system = { oobe = { enable = true; }; };\n")
@@ -121,8 +121,8 @@ def main():
         with (pending_dir / "host.zcfg").open("a") as output:
             output.write('users.alice.legacy = { isNormalUser = true; home = "/Users/alice"; '
                          'password = "evaluation-only"; extraGroups = [ "wheel" ]; };\n')
-        (pending_dir / "phase.zcfg").write_text("system.oobe.enable = false;\n")
-        assert not evaluate("oobe-test", "c: c.zenos.system.oobe.enable")
+        (pending_dir / "phase.zcfg").write_text("system.oobeMode = false;\n")
+        assert not evaluate("oobe-test", "c: c.zenos.system.oobeMode")
         # Misleading comments and an unrelated true option must not select OOBE.
         (pending_dir / "phase.zcfg").write_text(
             "# oobe = { enable = true; };\nlegacy.hardware.graphics.enable = true;\n"
@@ -133,7 +133,7 @@ def main():
         assert not final["failures"]
         # Removing the temporary option restores the public default, with no marker.
         (pending_dir / "system.zcfg").write_text("")
-        assert not evaluate("oobe-test", "c: c.zenos.system.oobe.enable")
+        assert not evaluate("oobe-test", "c: c.zenos.system.oobeMode")
         print("PASS: single-input installed flake, offline evaluation, ZCFG check/parse,")
         print("      local hardware, XDG, GNOME/KDE/headless choices, and declarative OOBE")
         print(f"Permanent desktop derivation: {desktop_drv}")

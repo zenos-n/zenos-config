@@ -25,7 +25,7 @@ the installed flake's local discovery and compilation logic.
   writes disabled. The pinned legacy rEFInd resource tree and generation sync
   script are unchanged; firmware fallback resources go under `EFI/BOOT`.
 - The temporary host enables OOBE declaratively with
-  `system.oobe.enable = true` in zcfg. The final host omits that assignment;
+  `system.oobeMode = true` in zcfg. The final host omits that assignment;
   ZenPkgs gates OOBE behavior on the evaluated module option. Import names,
   formatting, comments, and unrelated `enable = true` assignments do not select
   a stage. There is no `installerStage` argument in the installed flake.
