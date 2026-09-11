@@ -605,17 +605,17 @@
     "source-setup": {
       "flake": false,
       "locked": {
-        "lastModified": 1789161828,
-        "narHash": "sha256-o6fyipUBTEA2c/MWMtHGI54J0CcrsTtr0yVmoNlZTs4=",
+        "lastModified": 1789167000,
+        "narHash": "sha256-iaHE2mG7Rvjt+GixYtBC3NRV2pMpvHEig7zy2IbpgyQ=",
         "owner": "zenos-n",
         "repo": "zenos-setup",
-        "rev": "142e94764b17bf9766f0cff5e279df5515035f26",
+        "rev": "c5831500c8cbc506c721e0fe621fd4bf763c6e04",
         "type": "github"
       },
       "original": {
         "owner": "zenos-n",
         "repo": "zenos-setup",
-        "rev": "142e94764b17bf9766f0cff5e279df5515035f26",
+        "rev": "c5831500c8cbc506c721e0fe621fd4bf763c6e04",
         "type": "github"
       }
     },
@@ -733,11 +733,11 @@
         "vsc-extensions": "vsc-extensions"
       },
       "locked": {
-        "lastModified": 1789166008,
-        "narHash": "sha256-DNFtUe9J3EX934x5CmTCI3G6/5psHtlW35mniUIsn14=",
+        "lastModified": 1789167049,
+        "narHash": "sha256-5OoD/gnRVL/UyrvKD9V3Gc3afQ5Cj+ondcu1LSWHtYg=",
         "owner": "zenos-n",
         "repo": "zenpkgs",
-        "rev": "a5f1ca13852531391f63e8a2116d414659b2b69c",
+        "rev": "81c7744bb8cccd0be3d81bc0e96f4a7a29abf831",
         "type": "github"
       },
       "original": {
