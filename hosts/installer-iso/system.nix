@@ -7,7 +7,7 @@
 }:
 let
   releaseVersion = "1.0.0Nb";
-  configHash = builtins.substring 0 7 (builtins.hashString "sha256" inputs.self.sourceInfo.narHash);
+  configHash = builtins.substring 0 7 (builtins.hashString "sha256" inputs.zenpkgs.sourceInfo.narHash);
   displayVersion = "${releaseVersion} (${configHash})";
   setup = pkgs.zenos.system.zenos-setup;
   mode = pkgs.zenos.system.zenos-oobe-mode;

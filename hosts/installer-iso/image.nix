@@ -8,7 +8,7 @@
   ...
 }:
 let
-  configHash = builtins.substring 0 7 (builtins.hashString "sha256" inputs.self.sourceInfo.narHash);
+  configHash = builtins.substring 0 7 (builtins.hashString "sha256" inputs.zenpkgs.sourceInfo.narHash);
   bootHooks = import (inputs.zenpkgs + "/lib/installer-boot.nix") {
     inherit pkgs lib;
     bootPackage = pkgs.zenos.theming.system.zenos-plymouth.override {
