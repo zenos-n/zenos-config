@@ -37,7 +37,10 @@ in
 
   users.users.nixos.enable = lib.mkForce false;
   users.users.root.hashedPassword = lib.mkForce "!";
-  users.users.zenos.hashedPassword = lib.mkForce "$y$j9T$OIbmBuFryLyV3lwyAwPGE/$Fjh4vNdRE/ZdotTVv5KYmo8796pnD2oUzf3Wb.n32R5";
+  users.users.zenos = {
+    hashedPassword = lib.mkForce null;
+    password = lib.mkForce "zenos";
+  };
   services.getty.autologinUser = lib.mkForce null;
   services.openssh = {
     enable = lib.mkForce true;

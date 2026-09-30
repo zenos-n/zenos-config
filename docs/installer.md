@@ -6,6 +6,10 @@ ZenPkgs owns the public GNOME, installed-base, and OOBE modules, including their
 internal NixOS lowering. This repository composes the live image and supplies
 the installed flake's local discovery and compilation logic.
 
+The live image exposes SSH as `zenos` with password `zenos`. This is configured
+with the NixOS `password` option; no explicit password hash overrides it.
+The live account has passwordless sudo. Root SSH login remains disabled.
+
 ## Setup handoff: ready contract
 
 - This follows `ZenOS-Setup/TEMPLATE-CONTRACT.md`. The runner reads
