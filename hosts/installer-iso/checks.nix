@@ -63,7 +63,9 @@ assert live.system.nixos.extraOSReleaseArgs.LOGO == "zenos";
 assert live.system.nixos.extraLSBReleaseArgs.DISTRIB_RELEASE == "1.0.0Nb";
 assert live.system.image.id == "zenos-installer";
 assert builtins.all (driver: builtins.elem driver live.boot.initrd.kernelModules)
-  [ "i915" "xe" "amdgpu" "nouveau" "virtio_gpu" ];
+  [ "i915" "xe" "virtio_gpu" ];
+assert !builtins.elem "nouveau" live.boot.initrd.kernelModules;
+assert !builtins.elem "amdgpu" live.boot.initrd.kernelModules;
 assert live.system.image.version == "1.0.0Nb-${zenpkgsHash}";
 assert live.system.configurationRevision == zenpkgsHash;
 assert lib.hasInfix "--session=zenos-oobe" live.services.greetd.settings.initial_session.command;

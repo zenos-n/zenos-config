@@ -96,9 +96,10 @@ in
   };
   security.sudo.wheelNeedsPassword = false;
   security.rtkit.enable = true;
-  # Load DRM before Plymouth, rather than drawing first on the firmware's
-  # low-resolution framebuffer and waiting for stage two to load the GPU.
-  boot.initrd.kernelModules = [ "i915" "xe" "amdgpu" "nouveau" "virtio_gpu" ];
+  # Initialize Intel graphics before Plymouth for the tested laptop and
+  # virtio graphics for the test VM. Other GPUs load during stage two;
+  # forcing nouveau here embeds its large firmware set in the initrd.
+  boot.initrd.kernelModules = [ "i915" "xe" "virtio_gpu" ];
   hardware.graphics.enable = true;
   hardware.enableRedistributableFirmware = true;
   services.pipewire = {
