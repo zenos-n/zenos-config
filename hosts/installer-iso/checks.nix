@@ -114,6 +114,12 @@ assert live.users.users.zenos.hashedPassword == null;
 assert live.users.users.zenos.password == "zenos";
 assert !live.security.sudo.wheelNeedsPassword;
 assert desktop.services.displayManager.gdm.enable;
+assert desktop.home-manager.users.alice.dconf.settings."org/gnome/mutter".auto-maximize == false;
+assert builtins.elem pkgs.zenos.apps.ai.codex desktop.environment.systemPackages;
+assert pkgs.zenos.apps.ai.codex.version == "0.153.4";
+assert builtins.all (config:
+  builtins.elem pkgs.zenos.theming.system.zenos-branding config.environment.systemPackages
+) [ oobe desktop kde headless ];
 assert lib.hasInfix "--session=gnome-login" installed.nixosConfigurations.desktop-test.pkgs.gdm.postInstall;
 assert !oobe.services.displayManager.gdm.enable;
 assert !oobe.services.displayManager.sddm.enable;
@@ -180,7 +186,8 @@ pkgs.runCommand "zenos-installer-contract" { } ''
   PY
   test -f ${configTemplate}/flake.nix
   if grep -q 'github:NixOS/nixpkgs' ${configTemplate}/flake.nix; then exit 1; fi
-  grep -q 'path:${inputs.zenpkgs.outPath}' ${configTemplate}/flake.nix
+  grep -q 'github:zenos-n/zenpkgs/migration/path-derived-dsl' ${configTemplate}/flake.nix
+  if grep -q 'path:/nix/store' ${configTemplate}/flake.nix; then exit 1; fi
   if grep -q 'zenosSource\|setup-hardware' ${configTemplate}/flake.nix; then exit 1; fi
   test -x ${lib.getExe setup}
   test -f ${mode}/share/gnome-shell/modes/zenos-oobe.json

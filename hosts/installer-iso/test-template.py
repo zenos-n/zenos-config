@@ -33,7 +33,8 @@ def main():
     assert "zenosSource" not in template_text
     assert "setup-hardware" not in template_text
     assert "github:NixOS/nixpkgs" not in template_text
-    assert "path:/nix/store" in template_text
+    assert 'github:zenos-n/zenpkgs/migration/path-derived-dsl' in template_text
+    assert "path:/nix/store" not in template_text
     assert "hasInfix" not in template_text
     assert "hardware-configuration.nix" not in template_text
     assert "installerStage" not in template_text
@@ -50,14 +51,15 @@ def main():
             if args.zenpkgs_source else []
         )
         ref = f"path:{config}"
-        run("nix", "flake", "lock", "--offline", *override, ref)
+        run("nix", "flake", "lock", *override, ref)
         lock = json.loads((config / "flake.lock").read_text())
         root_inputs = lock["nodes"]["root"]["inputs"]
         assert set(root_inputs) == {"zenpkgs"}
         zenpkgs_node = lock["nodes"][root_inputs["zenpkgs"]]
         if not args.zenpkgs_source:
-            assert zenpkgs_node["locked"]["type"] == "path", zenpkgs_node
-            assert zenpkgs_node["locked"]["path"].startswith("/nix/store/"), zenpkgs_node
+            assert zenpkgs_node["locked"]["type"] == "github", zenpkgs_node
+            assert zenpkgs_node["locked"]["owner"] == "zenos-n", zenpkgs_node
+            assert zenpkgs_node["locked"]["repo"] == "zenpkgs", zenpkgs_node
         run(
             "nix", "eval", "--no-write-lock-file", "--raw",
             f"{ref}#nixosConfigurations.oobe-test.config.system.build.toplevel.drvPath",
