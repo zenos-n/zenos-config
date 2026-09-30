@@ -12,7 +12,9 @@ the installed flake's local discovery and compilation logic.
   `/iso-config-template/flake.nix` before disk work and copies it to
   `/mnt/etc/ZenOS/flake.nix`. It generates `hosts/<host>/host.zcfg` and its ZCFG
   imports, not `host.nix`. The template compiles them into the Nix store.
-- The installed template contains only the `zenpkgs` input. It owns host
+- The installed template contains only the `zenpkgs` root input, recursively
+  pinned to the exact source paths retained by the image. Its first lock is
+  offline and cannot select a different upstream revision. It owns host
   discovery and compilation in its generated `flake.nix`. Each `host.zcfg`
   includes `_import "./hardware.zcfg";`. No hardware Nix, hardware input,
   hardware JSON, or OOBE JSON is consumed. `flake.nix` is the only editable Nix

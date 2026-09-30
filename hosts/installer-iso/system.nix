@@ -96,6 +96,9 @@ in
   };
   security.sudo.wheelNeedsPassword = false;
   security.rtkit.enable = true;
+  # Load DRM before Plymouth, rather than drawing first on the firmware's
+  # low-resolution framebuffer and waiting for stage two to load the GPU.
+  boot.initrd.kernelModules = [ "i915" "xe" "amdgpu" "nouveau" "virtio_gpu" ];
   hardware.graphics.enable = true;
   hardware.enableRedistributableFirmware = true;
   services.pipewire = {
@@ -189,7 +192,7 @@ in
   environment.systemPackages = [
     inputs.zenpkgs.packages.x86_64-linux.zen-dsl
     pkgs.nixos-rebuild
-    pkgs.zenos.programs.zenos-rebuild
+    pkgs.zenos.apps.system.zenos.zenos-rebuild
     setup
     mode
     pkgs.gnome-console

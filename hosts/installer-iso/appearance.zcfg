@@ -171,16 +171,17 @@ desktops.gnome = {
 
 # Package selection does not activate an extension.
 system.packages = {
-  apps.gnome-extensions = {
+  desktops.gnome.extensions = {
+    dash-stacks = true;
+    forge = true;
     alphabetical-app-grid = true;
     app-hider = true;
     burn-my-windows = true;
     clipboard-indicator = true;
     hide-top-bar = true;
   };
-  desktops.gnome.extensions = { dash-stacks = true; forge = true; };
-  apps.cursors.google-dot = true;
-  apps.themes.adw-gtk3 = true;
+  theming.cursors.google-dot = true;
+  theming.apps.adw-gtk3 = true;
   theming.icons.adwaita-hacks = true;
 };
 

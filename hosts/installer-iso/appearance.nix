@@ -63,9 +63,9 @@ in
       };
       gtk = {
         enable = true;
-        theme = { name = "adw-gtk3-dark"; package = pkgs.zenos.apps.themes.adw-gtk3; };
+        theme = { name = "adw-gtk3-dark"; package = pkgs.zenos.theming.apps.adw-gtk3; };
         iconTheme = { name = "Adwaita-hacks"; package = pkgs.zenos.theming.icons.adwaita-hacks; };
-        cursorTheme = { name = "GoogleDot-Black"; package = pkgs.zenos.apps.cursors.google-dot; size = 24; };
+        cursorTheme = { name = "GoogleDot-Black"; package = pkgs.zenos.theming.cursors.google-dot; size = 24; };
         font = { name = "Atkinson Hyperlegible"; size = 11; };
         gtk3.extraConfig.gtk-application-prefer-dark-theme = true;
         gtk3.extraConfig.gtk-decoration-layout = ":close";

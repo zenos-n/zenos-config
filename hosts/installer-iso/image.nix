@@ -69,7 +69,7 @@ in
     pkgs.gparted
     pkgs.gnome-disk-utility
     pkgs.zenos.system.zenos-recovery-tools
-    pkgs.zenos.apps.utilities.resources
+    pkgs.zenos.apps.system.monitoring.resources
     pkgs.zenos.apps.system.btop
     pkgs.zenos.apps.system.eza
     pkgs.zenos.apps.development-tools.nano

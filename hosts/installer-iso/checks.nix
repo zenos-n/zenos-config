@@ -22,6 +22,9 @@ let
   desktop = installed.nixosConfigurations.desktop-test.config;
   kde = installed.nixosConfigurations.kde-test.config;
   headless = installed.nixosConfigurations.headless-test.config;
+  # Dconf searches databases from first to last for unlocked settings.
+  oobeSettings = lib.foldl' lib.recursiveUpdate { }
+    (map (database: database.settings) (lib.reverseList oobe.programs.dconf.profiles.user.databases));
   installedNativeTools = map toString desktop.system.build.zenosGeneratedConfig.nativeBuildInputs;
   valid =
     config:
@@ -59,6 +62,8 @@ assert live.system.nixos.extraOSReleaseArgs.CPE_NAME == "cpe:/o:zenos:zenos:1.0.
 assert live.system.nixos.extraOSReleaseArgs.LOGO == "zenos";
 assert live.system.nixos.extraLSBReleaseArgs.DISTRIB_RELEASE == "1.0.0Nb";
 assert live.system.image.id == "zenos-installer";
+assert builtins.all (driver: builtins.elem driver live.boot.initrd.kernelModules)
+  [ "i915" "xe" "amdgpu" "nouveau" "virtio_gpu" ];
 assert live.system.image.version == "1.0.0Nb-${zenpkgsHash}";
 assert live.system.configurationRevision == zenpkgsHash;
 assert lib.hasInfix "--session=zenos-oobe" live.services.greetd.settings.initial_session.command;
@@ -70,23 +75,23 @@ assert oobe.systemd.user.services.zenos-oobe.environment.ZENOS_SETUP_DRY_RUN == 
 assert !oobe.services.displayManager.gdm.enable;
 assert oobe.users.users.zenos.home == "/run/zenos-oobe";
 assert
-  unpack oobe.home-manager.users.zenos.dconf.settings."org/gnome/shell".enabled-extensions == [
+  unpack oobeSettings."org/gnome/shell".enabled-extensions == [
     "date-menu-formatter@marcinjakubowski.github.com"
     "user-theme@gnome-shell-extensions.gcampax.github.com"
     "zenos-oobe-mode@neg-zero.com"
   ];
 assert
-  oobe.home-manager.users.zenos.dconf.settings."org/gnome/shell/extensions/user-theme".name
+  oobeSettings."org/gnome/shell/extensions/user-theme".name
   == "ClockOverride";
 assert
   unpack
-    oobe.home-manager.users.zenos.dconf.settings."org/gnome/shell/extensions/date-menu-formatter".pattern
+    oobeSettings."org/gnome/shell/extensions/date-menu-formatter".pattern
   == "dd.MM  HH:mm";
 assert
-  oobe.home-manager.users.zenos.dconf.settings."org/gnome/desktop/background".picture-options
+  oobeSettings."org/gnome/desktop/background".picture-options
   == "none";
 assert
-  oobe.home-manager.users.zenos.dconf.settings."org/gnome/desktop/background".primary-color
+  oobeSettings."org/gnome/desktop/background".primary-color
   == "#000000";
 assert lib.hasInfix "font-family: \"Zero\""
   oobe.home-manager.users.zenos.xdg.dataFile."themes/ClockOverride/gnome-shell/gnome-shell.css".text;
@@ -95,7 +100,8 @@ assert desktop.services.openssh.enable;
 assert desktop.services.openssh.openFirewall;
 assert desktop.services.openssh.settings.PasswordAuthentication;
 assert desktop.services.openssh.settings.PermitRootLogin == "no";
-assert !oobe.services.openssh.enable;
+assert oobe.services.openssh.enable;
+assert oobe.services.openssh.settings.PermitRootLogin == "no";
 assert live.services.openssh.enable;
 assert live.services.openssh.openFirewall;
 assert builtins.elem 22 live.networking.firewall.allowedTCPPorts;
@@ -104,7 +110,7 @@ assert live.services.openssh.settings.PermitRootLogin == "no";
 assert live.users.users.root.hashedPassword == "!";
 assert live.users.users.zenos.hashedPassword != "";
 assert desktop.services.displayManager.gdm.enable;
-assert desktop.services.displayManager.gdm.settings.daemon.GreeterSession == "gnome-login";
+assert lib.hasInfix "--session=gnome-login" installed.nixosConfigurations.desktop-test.pkgs.gdm.postInstall;
 assert !oobe.services.displayManager.gdm.enable;
 assert !oobe.services.displayManager.sddm.enable;
 assert !oobe.services.displayManager.plasma-login-manager.enable;
@@ -170,9 +176,8 @@ pkgs.runCommand "zenos-installer-contract" { } ''
   PY
   test -f ${configTemplate}/flake.nix
   if grep -q 'github:NixOS/nixpkgs' ${configTemplate}/flake.nix; then exit 1; fi
-  grep -q 'github:zenos-n/zenpkgs/migration/path-derived-dsl' ${configTemplate}/flake.nix
+  grep -q 'path:${inputs.zenpkgs.outPath}' ${configTemplate}/flake.nix
   if grep -q 'zenosSource\|setup-hardware' ${configTemplate}/flake.nix; then exit 1; fi
-  if grep -q 'path:/nix/store' ${configTemplate}/flake.nix; then exit 1; fi
   test -x ${lib.getExe setup}
   test -f ${mode}/share/gnome-shell/modes/zenos-oobe.json
   test -f ${mode}/share/gnome-shell/extensions/zenos-oobe-mode@neg-zero.com/metadata.json
