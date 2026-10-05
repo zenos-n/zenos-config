@@ -33,11 +33,21 @@ def main():
     assert "zenosSource" not in template_text
     assert "setup-hardware" not in template_text
     assert "github:NixOS/nixpkgs" not in template_text
-    assert 'github:zenos-n/zenpkgs/migration/path-derived-dsl' in template_text
+    assert 'github:zenos-n/zenpkgs/' in template_text
     assert "path:/nix/store" not in template_text
     assert "hasInfix" not in template_text
     assert "hardware-configuration.nix" not in template_text
     assert "installerStage" not in template_text
+    declared_inputs = json.loads(run(
+        "nix", "eval", "--json", "--file", str(template / "flake.nix"),
+        "--apply", "flake: builtins.attrNames flake.inputs",
+    ))
+    assert declared_inputs == ["zenpkgs"], declared_inputs
+    dependency = json.loads(run(
+        "nix", "eval", "--json", "--file", str(template / "flake.nix"),
+        "--apply", "flake: flake.inputs.zenpkgs",
+    ))
+    assert set(dependency) == {"url"}, dependency
     fixtures = Path(__file__).resolve().parent / "fixtures"
     with tempfile.TemporaryDirectory(prefix="zenos-template-test-", dir="/tmp") as work:
         config = Path(work) / "config"
@@ -117,7 +127,7 @@ def main():
         assert not evaluate("desktop-test", "c: c.zenos.system.oobeMode")
         # Same evaluated option through nested spelling and a differently named import.
         (pending_dir / "system.zcfg").write_text('_import "./phase.zcfg";\n')
-        (pending_dir / "phase.zcfg").write_text("system = { oobe = { enable = true; }; };\n")
+        (pending_dir / "phase.zcfg").write_text("system = { oobeMode = true; };\n")
         assert evaluate("oobe-test", summary)["oobe"]
         with (pending_dir / "host.zcfg").open("a") as output:
             output.write('users.alice.legacy = { isNormalUser = true; home = "/Users/alice"; '

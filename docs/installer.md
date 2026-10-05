@@ -17,9 +17,12 @@ The live account has passwordless sudo. Root SSH login remains disabled.
   `/mnt/etc/ZenOS/flake.nix`. It generates `hosts/<host>/host.zcfg` and its ZCFG
   imports, not `host.nix`. The template compiles them into the Nix store.
 - The installed template contains only the `zenpkgs` root input, pointing to
-  `github:zenos-n/zenpkgs/migration/path-derived-dsl`. Its first lock requires
-  network access and pins the selected GitHub revision. Later OTA tests can
-  advance it with `nix flake update zenpkgs` before `zenos-rebuild`. It owns host
+  the same ZenPkgs GitHub reference as the image flake. Its first lock requires
+  network access and records the resolved revision in `flake.lock`. It does not
+  copy ZenPkgs inputs into the installed flake. ZenPkgs selects releases, or
+  pins the latest commit when no suitable release exists.
+  Later OTA tests can advance it with `nix flake update zenpkgs` before
+  `zenos-rebuild`. It owns host
   discovery and compilation in its generated `flake.nix`. Each `host.zcfg`
   includes `_import "./hardware.zcfg";`. No hardware Nix, hardware input,
   hardware JSON, or OOBE JSON is consumed. `flake.nix` is the only editable Nix

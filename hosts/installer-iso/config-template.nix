@@ -3,7 +3,7 @@ pkgs.writeTextDir "flake.nix" ''
   {
     description = "ZenOS installed system configuration";
     inputs.zenpkgs = {
-      url = "github:zenos-n/zenpkgs/migration/path-derived-dsl";
+      url = ${builtins.toJSON (import ../../flake.nix).inputs.zenpkgs.url};
     };
     outputs = inputs@{ self, zenpkgs }:
       (${builtins.readFile ./installed-hosts.nix}) {

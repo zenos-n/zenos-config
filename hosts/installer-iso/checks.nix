@@ -186,7 +186,7 @@ pkgs.runCommand "zenos-installer-contract" { } ''
   PY
   test -f ${configTemplate}/flake.nix
   if grep -q 'github:NixOS/nixpkgs' ${configTemplate}/flake.nix; then exit 1; fi
-  grep -q 'github:zenos-n/zenpkgs/migration/path-derived-dsl' ${configTemplate}/flake.nix
+  grep -Fq '${(import ../../flake.nix).inputs.zenpkgs.url}' ${configTemplate}/flake.nix
   if grep -q 'path:/nix/store' ${configTemplate}/flake.nix; then exit 1; fi
   if grep -q 'zenosSource\|setup-hardware' ${configTemplate}/flake.nix; then exit 1; fi
   test -x ${lib.getExe setup}
