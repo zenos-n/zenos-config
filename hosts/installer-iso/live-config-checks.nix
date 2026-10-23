@@ -41,6 +41,32 @@ let
     lib.mapAttrs (_: lib.mapAttrs (_: value: toString (gvariant.mkValue value))) (
       desktopSettings config
     );
+  actualSettings = encodedSettings live;
+  expectedSettings = encodedSettings original;
+  changedDconfGroups = builtins.filter
+    (group: (actualSettings.${group} or null) != (expectedSettings.${group} or null))
+    (lib.unique (builtins.attrNames actualSettings ++ builtins.attrNames expectedSettings));
+  dconfDiagnostic = builtins.toJSON {
+    changedGroupCount = builtins.length changedDconfGroups;
+    # Bound remote CI output while retaining missing keys and both encoded values.
+    limits = { groups = 12; keysPerGroup = 24; valueCharacters = 512; };
+    groups = map (group:
+      let
+        actual = actualSettings.${group} or { };
+        expected = expectedSettings.${group} or { };
+        keys = builtins.filter (key: (actual.${key} or null) != (expected.${key} or null))
+          (lib.unique (builtins.attrNames actual ++ builtins.attrNames expected));
+        boundedValue = value: if value == null then null else builtins.substring 0 512 value;
+      in {
+        inherit group;
+        changedKeyCount = builtins.length keys;
+        keys = map (key: {
+          inherit key;
+          actual = boundedValue (actual.${key} or null);
+          expected = boundedValue (expected.${key} or null);
+        }) (lib.take 24 keys);
+      }) (lib.take 12 changedDconfGroups);
+  };
   packageIds = config: map toString config.environment.systemPackages;
   report = builtins.fromJSON (
     builtins.unsafeDiscardStringContext (builtins.readFile (seed + "/base-effective.json"))
@@ -76,11 +102,15 @@ assert live.environment.etc."machine-info".text == original.environment.etc."mac
 assert live.fileSystems == original.fileSystems;
 assert live.services.greetd.settings == original.services.greetd.settings;
 assert live.users.users.zenos.home == original.users.users.zenos.home;
+assert lib.assertMsg
+  (builtins.attrNames (live.zenos.users or { }) == builtins.attrNames (original.zenos.users or { }))
+  "The live snapshot must not activate additional frontend user profiles";
 assert live.environment.systemPackages == original.environment.systemPackages;
 assert map (package: package.storePath) report.packages == packageIds original;
 assert live.fonts.fontconfig.defaultFonts == original.fonts.fontconfig.defaultFonts;
 assert live.fonts.packages == original.fonts.packages;
-assert desktopSource == null || encodedSettings live == encodedSettings original;
+assert lib.assertMsg (desktopSource == null || actualSettings == expectedSettings)
+  "Live config dconf differs from original image (actual=live, expected=original): ${dconfDiagnostic}";
 assert desktopSource == null || live.zenos.desktops.gnome == original.zenos.desktops.gnome;
 assert
   desktopSource == null

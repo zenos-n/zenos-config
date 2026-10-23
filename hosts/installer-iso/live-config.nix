@@ -64,8 +64,10 @@ let
       ${builtins.readFile desktopSource}
 
       # User interface defaults from the image's appearance backend.
+      # Reuse the existing backend user so replay does not activate
+      # additional per-user module defaults and actions.
       # GNOME dconf and GTK font/theme names are separate settings; edit both.
-      ${assignments "users.zenos.legacy.homeManager" desktopValues}
+      ${assignments "legacy.home-manager.users.zenos" desktopValues}
     ''
   );
   # Reference paths must not make reading this report build every listed package.
