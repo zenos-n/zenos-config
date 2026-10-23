@@ -40,6 +40,23 @@ for _ in $(seq 1 90); do
   fi
   sleep 2
 done
+if [ "$status" -eq 0 ]; then
+  app_ready=false
+  for _ in $(seq 1 30); do
+    if "${remote[@]}" 'XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus busctl --user status com.negzero.zenos.setup' >"$output/application-bus.log" 2>&1; then
+      app_ready=true
+      break
+    fi
+    sleep 2
+  done
+  if [ "$app_ready" = true ]; then
+    # Service activation precedes Python/GTK startup and the first rendered frame.
+    sleep 20
+    "${remote[@]}" 'systemctl is-active greetd && XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus systemctl --user is-active org.gnome.Shell@zenos-oobe.service zenos-setup.service' >"$output/services.log" 2>&1 || status=1
+  else
+    status=1
+  fi
+fi
 "${remote[@]}" 'sudo journalctl -b --no-pager -n 300' >"$output/journal.log" 2>&1 || true
 python3 - "$output" <<'PY'
 from pathlib import Path
@@ -51,6 +68,14 @@ with socket.socket(socket.AF_UNIX,socket.SOCK_STREAM) as monitor:
     time.sleep(1)
 # QEMU PPM is sufficient for visual review; do not download the ISO again.
 (root/'monitor.sock').unlink(missing_ok=True)
+with (root/'screen.ppm').open('rb') as frame:
+    assert frame.readline().strip() == b'P6'
+    width,height = map(int, frame.readline().split())
+    assert frame.readline().strip() == b'255'
+    pixels = frame.read()
+assert len(pixels) == width * height * 3
+if pixels == pixels[:3] * (width * height):
+    raise SystemExit('Framebuffer is a solid color; graphical readiness is not verified')
 PY
 cat "$output/services.log"
 exit "$status"
