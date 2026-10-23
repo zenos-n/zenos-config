@@ -3,7 +3,7 @@
 
   inputs = {
     zenpkgs = {
-      url = "github:zenos-n/zenpkgs/migration/path-derived-dsl";
+      url = "github:zenos-n/zenpkgs/main";
     };
   };
 

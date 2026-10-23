@@ -116,7 +116,7 @@ assert !live.security.sudo.wheelNeedsPassword;
 assert desktop.services.displayManager.gdm.enable;
 assert desktop.home-manager.users.alice.dconf.settings."org/gnome/mutter".auto-maximize == false;
 assert builtins.elem pkgs.zenos.apps.ai.codex desktop.environment.systemPackages;
-assert pkgs.zenos.apps.ai.codex.version == "0.153.4";
+assert pkgs.zenos.apps.ai.codex.version == "0.164.0";
 assert builtins.all (config:
   builtins.elem pkgs.zenos.theming.system.zenos-branding config.environment.systemPackages
 ) [ oobe desktop kde headless ];

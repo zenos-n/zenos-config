@@ -33,3 +33,5 @@ nix build path:.#checks.x86_64-linux.repository-structure
 
 Run builds and acceptance checks in a ZenOS VM. The installer ISO, installed
 template, and Setup handoff are described in [docs/installer.md](docs/installer.md).
+
+Install personal hosts through the general image’s [online-config flow](docs/online-config.md).
