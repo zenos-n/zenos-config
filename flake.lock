@@ -912,11 +912,11 @@
         "vsc-extensions": "vsc-extensions"
       },
       "locked": {
-        "lastModified": 1792771118,
-        "narHash": "sha256-Z5S3EdFYORHt9yDjMl/GRQb2Cg5p01uXOwSVN75+Ag0=",
+        "lastModified": 1792774686,
+        "narHash": "sha256-K+pqEtUCcm036szieOB46T/RqnRQlFGVzPU7VlPleR8=",
         "owner": "zenos-n",
         "repo": "zenpkgs",
-        "rev": "52045eb31ce0d4c4d5c9684773ca2921be9c74d3",
+        "rev": "726db6a12283cda41b223723d69446325495edc7",
         "type": "github"
       },
       "original": {
