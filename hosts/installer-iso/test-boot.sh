@@ -7,11 +7,16 @@ mkdir -p "$output"
 output=$(realpath "$output")
 firmware=$(find /usr/share/OVMF -maxdepth 1 -name OVMF_CODE_4M.fd -print -quit)
 test -n "$firmware"
+variables=$(find /usr/share/OVMF -maxdepth 1 -name OVMF_VARS_4M.fd -print -quit)
+test -n "$variables"
+cp "$variables" "$output/OVMF_VARS.fd"
 accel=tcg
 if [ -r /dev/kvm ] && [ -w /dev/kvm ]; then accel=kvm; fi
 qemu-system-x86_64 \
   -machine q35,accel="$accel" -cpu max -m 4096 -smp 2 \
-  -bios "$firmware" -cdrom "$iso" -boot d \
+  -drive if=pflash,format=raw,unit=0,readonly=on,file="$firmware" \
+  -drive if=pflash,format=raw,unit=1,file="$output/OVMF_VARS.fd" \
+  -cdrom "$iso" -boot d \
   -device virtio-vga -display none \
   -nic user,model=virtio-net-pci,hostfwd=tcp:127.0.0.1:2222-:22 \
   -serial "file:$output/serial.log" \
@@ -22,7 +27,7 @@ trap 'kill "$vm_pid" 2>/dev/null || true; wait "$vm_pid" 2>/dev/null || true' EX
 remote=(sshpass -p zenos ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=2 -p 2222 zenos@127.0.0.1)
 ready=false
 for _ in $(seq 1 180); do
-  kill -0 "$vm_pid"
+  if ! kill -0 "$vm_pid" 2>/dev/null; then cat "$output/qemu.log"; exit 1; fi
   if "${remote[@]}" true 2>/dev/null; then ready=true; break; fi
   sleep 2
 done
