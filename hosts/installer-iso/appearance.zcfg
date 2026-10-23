@@ -171,7 +171,7 @@ desktops.gnome = {
 
 # Package selection does not activate an extension.
 system.packages = {
-  desktops.gnome.extensions = {
+  byCategories.desktops.gnome.extensions = {
     dash-stacks = true;
     forge = true;
     alphabetical-app-grid = true;
@@ -180,19 +180,19 @@ system.packages = {
     clipboard-indicator = true;
     hide-top-bar = true;
   };
-  theming.cursors.google-dot = true;
-  theming.apps.adw-gtk3 = true;
-  theming.icons.adwaita-hacks = true;
+  byCategories.theming.cursors.google-dot = true;
+  byCategories.theming.apps.adw-gtk3 = true;
+  byCategories.theming.icons.adwaita-hacks = true;
 };
 
 legacy.fonts = {
   packages = [
-    $pkgs.apps.fonts.atkinson-hyperlegible
-    $pkgs.apps.fonts.atkinson-hyperlegible-mono
+    $pkgs.byCategories.apps.fonts.atkinson-hyperlegible
+    $pkgs.byCategories.apps.fonts.atkinson-hyperlegible-mono
     $pkgs.legacy.nerd-fonts.atkynson-mono
-    $pkgs.apps.fonts.inter
-    $pkgs.theming.fonts.zero.mono-thin
-    $pkgs.theming.fonts.zero.regular
+    $pkgs.byCategories.apps.fonts.inter
+    $pkgs.byCategories.theming.fonts.zero.mono-thin
+    $pkgs.byCategories.theming.fonts.zero.regular
   ];
   fontDir.enable = true;
   fontconfig.defaultFonts = {

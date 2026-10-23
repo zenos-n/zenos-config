@@ -22,9 +22,9 @@ let
   ];
   disabledModules = [ "alphabetical-app-grid" "app-hider" "burn-my-windows" "clipboard-indicator" "hide-top-bar" "dash-stacks" "forge" ];
   fontPackages = with pkgs.zenos; [
-    apps.fonts.atkinson-hyperlegible apps.fonts.atkinson-hyperlegible-mono
-    legacy.nerd-fonts.atkynson-mono apps.fonts.inter
-    theming.fonts.zero.regular theming.fonts.zero.mono-thin
+    byCategories.apps.fonts.atkinson-hyperlegible byCategories.apps.fonts.atkinson-hyperlegible-mono
+    legacy.nerd-fonts.atkynson-mono byCategories.apps.fonts.inter
+    byCategories.theming.fonts.zero.regular byCategories.theming.fonts.zero.mono-thin
   ];
   snapshot = pkgs.writeText "appearance-generated.json" (builtins.toJSON {
     inherit encoded;
@@ -72,6 +72,6 @@ pkgs.runCommand "zenos-live-appearance-contract" {
   ${python}/bin/python ${./test-appearance.py} \
     --generated "$out/generated.json" --expected "$out/expected.json" \
     --system ${live.system.path} --home ${home.home.activationPackage} --assets-only
-  test -s ${pkgs.zenos.system.zenos-setup.src}/data/wallpapers/purple.png
+  test -s ${pkgs.zenos.byCategories.system.zenos-setup.src}/data/wallpapers/purple.png
   test -f ${home.xdg.configFile."mozilla/firefox/default/chrome/gnome-theme".source}/userChrome.css
 ''

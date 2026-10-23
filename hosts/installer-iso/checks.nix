@@ -40,16 +40,22 @@ let
       map unpack value
     else
       value;
-  setup = pkgs.zenos.system.zenos-setup;
-  mode = pkgs.zenos.system.zenos-oobe-mode;
-  refindInstaller = pkgs.zenos.system.zenos-refind-installer;
-  refindTheme = pkgs.zenos.theming.system.zenos-refind-theme;
+  setup = pkgs.zenos.byCategories.system.zenos-setup;
+  setupBuilderSource = builtins.readFile "${setup.src}/src/builder.py";
+  setupRunnerSource = builtins.readFile "${setup.src}/src/runner.py";
+  mode = pkgs.zenos.byCategories.system.zenos-oobe-mode;
+  refindInstaller = pkgs.zenos.byCategories.system.zenos-refind-installer;
+  refindTheme = pkgs.zenos.byCategories.theming.system.zenos-refind-theme;
 in
 assert valid live;
 assert valid oobe;
 assert valid desktop;
 assert valid kde;
 assert valid headless;
+assert lib.assertMsg (lib.hasInfix ''("system", "packages", "byCategories", *path)'' setupBuilderSource)
+  "Packaged ZenOS Setup must generate byCategories package selectors; refresh the zenos-setup ZPKG source pin.";
+assert lib.assertMsg (lib.hasInfix "def _fetch_online_source(" setupRunnerSource)
+  "Packaged ZenOS Setup must support online source fetching; refresh the zenos-setup ZPKG source pin.";
 assert !headless.services.desktopManager.gnome.enable;
 assert !headless.services.displayManager.gdm.enable;
 assert desktop.system.nixos.distroId == "zenos";
@@ -115,10 +121,10 @@ assert live.users.users.zenos.password == "zenos";
 assert !live.security.sudo.wheelNeedsPassword;
 assert desktop.services.displayManager.gdm.enable;
 assert desktop.home-manager.users.alice.dconf.settings."org/gnome/mutter".auto-maximize == false;
-assert builtins.elem pkgs.zenos.apps.ai.codex desktop.environment.systemPackages;
-assert pkgs.zenos.apps.ai.codex.version == "0.164.0";
+assert builtins.elem pkgs.zenos.byCategories.apps.ai.codex desktop.environment.systemPackages;
+assert pkgs.zenos.byCategories.apps.ai.codex.version == "0.164.0";
 assert builtins.all (config:
-  builtins.elem pkgs.zenos.theming.system.zenos-branding config.environment.systemPackages
+  builtins.elem pkgs.zenos.byCategories.theming.system.zenos-branding config.environment.systemPackages
 ) [ oobe desktop kde headless ];
 assert lib.hasInfix "--session=gnome-login" installed.nixosConfigurations.desktop-test.pkgs.gdm.postInstall;
 assert !oobe.services.displayManager.gdm.enable;

@@ -13,19 +13,19 @@ let
       or (throw "ZenPkgs input must provide a Git revision for ZenOS versioning");
   zenpkgsHash = builtins.substring 0 7 zenpkgsRevision;
   displayVersion = "${releaseVersion} (${zenpkgsHash})";
-  setup = pkgs.zenos.system.zenos-setup;
-  mode = pkgs.zenos.system.zenos-oobe-mode;
+  setup = pkgs.zenos.byCategories.system.zenos-setup;
+  mode = pkgs.zenos.byCategories.system.zenos-oobe-mode;
   sessionCommand = "${pkgs.coreutils}/bin/env XDG_SESSION_TYPE=wayland XDG_SESSION_CLASS=user XDG_SESSION_DESKTOP=GNOME XDG_CURRENT_DESKTOP=GNOME ZENOS_OOBE=1 ${config.services.displayManager.sessionData.wrapper} ${pkgs.gnome-session}/bin/gnome-session --session=zenos-oobe";
   normalUsers = lib.filterAttrs (_: user: user.enable && user.isNormalUser) config.users.users;
   bootHooks = import (inputs.zenpkgs + "/lib/installer-boot.nix") {
     inherit pkgs lib;
-    bootPackage = pkgs.zenos.theming.system.zenos-plymouth.override {
+    bootPackage = pkgs.zenos.byCategories.theming.system.zenos-plymouth.override {
       distroName = "ZenOS";
       releaseVersion = displayVersion;
       deviceName = "ZenOS Installer";
     };
-    refindInstaller = pkgs.zenos.system.zenos-refind-installer;
-    refindTheme = pkgs.zenos.theming.system.zenos-refind-theme;
+    refindInstaller = pkgs.zenos.byCategories.system.zenos-refind-installer;
+    refindTheme = pkgs.zenos.byCategories.theming.system.zenos-refind-theme;
   };
 in
 {
@@ -193,7 +193,7 @@ in
   environment.systemPackages = [
     inputs.zenpkgs.packages.x86_64-linux.zen-dsl
     pkgs.nixos-rebuild
-    pkgs.zenos.apps.system.zenos.zenos-rebuild
+    pkgs.zenos.byCategories.apps.system.zenos.zenos-rebuild
     setup
     mode
     pkgs.gnome-console

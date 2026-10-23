@@ -15,13 +15,13 @@ let
   zenpkgsHash = builtins.substring 0 7 zenpkgsRevision;
   bootHooks = import (inputs.zenpkgs + "/lib/installer-boot.nix") {
     inherit pkgs lib;
-    bootPackage = pkgs.zenos.theming.system.zenos-plymouth.override {
+    bootPackage = pkgs.zenos.byCategories.theming.system.zenos-plymouth.override {
       distroName = "ZenOS";
       releaseVersion = "1.0.0Nb (${zenpkgsHash})";
       deviceName = "ZenOS Installer";
     };
-    refindInstaller = pkgs.zenos.system.zenos-refind-installer;
-    refindTheme = pkgs.zenos.theming.system.zenos-refind-theme;
+    refindInstaller = pkgs.zenos.byCategories.system.zenos-refind-installer;
+    refindTheme = pkgs.zenos.byCategories.theming.system.zenos-refind-theme;
   };
 in
 {
@@ -71,13 +71,13 @@ in
     pkgs.openssl
     pkgs.gparted
     pkgs.gnome-disk-utility
-    pkgs.zenos.system.zenos-recovery-tools
-    pkgs.zenos.apps.system.monitoring.resources
-    pkgs.zenos.apps.system.btop
-    pkgs.zenos.apps.system.eza
-    pkgs.zenos.apps.development-tools.nano
-    pkgs.zenos.apps.development.neovim
-  ] ++ builtins.attrValues pkgs.zenos.apps.recovery;
+    pkgs.zenos.byCategories.system.zenos-recovery-tools
+    pkgs.zenos.byCategories.apps.system.monitoring.resources
+    pkgs.zenos.byCategories.apps.system.btop
+    pkgs.zenos.byCategories.apps.system.eza
+    pkgs.zenos.byCategories.apps.development-tools.nano
+    pkgs.zenos.byCategories.apps.development.neovim
+  ] ++ builtins.attrValues pkgs.zenos.byCategories.apps.recovery;
   environment.shellAliases.vim = "nvim";
   environment.shellAliases.ls = "eza";
   services.spice-vdagentd.enable = true;

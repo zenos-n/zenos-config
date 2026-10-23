@@ -1,6 +1,6 @@
 { config, installerStage, lib, pkgs, ... }:
 let
-  wallpaper = "${pkgs.zenos.system.zenos-setup.src}/data/wallpapers/purple.png";
+  wallpaper = "${pkgs.zenos.byCategories.system.zenos-setup.src}/data/wallpapers/purple.png";
   firefoxGnomeTheme = pkgs.fetchFromGitHub {
     owner = "rafaelmardojai";
     repo = "firefox-gnome-theme";
@@ -63,9 +63,9 @@ in
       };
       gtk = {
         enable = true;
-        theme = { name = "adw-gtk3-dark"; package = pkgs.zenos.theming.apps.adw-gtk3; };
-        iconTheme = { name = "Adwaita-hacks"; package = pkgs.zenos.theming.icons.adwaita-hacks; };
-        cursorTheme = { name = "GoogleDot-Black"; package = pkgs.zenos.theming.cursors.google-dot; size = 24; };
+        theme = { name = "adw-gtk3-dark"; package = pkgs.zenos.byCategories.theming.apps.adw-gtk3; };
+        iconTheme = { name = "Adwaita-hacks"; package = pkgs.zenos.byCategories.theming.icons.adwaita-hacks; };
+        cursorTheme = { name = "GoogleDot-Black"; package = pkgs.zenos.byCategories.theming.cursors.google-dot; size = 24; };
         font = { name = "Atkinson Hyperlegible"; size = 11; };
         gtk3.extraConfig.gtk-application-prefer-dark-theme = true;
         gtk3.extraConfig.gtk-decoration-layout = ":close";
@@ -92,7 +92,7 @@ in
 
     programs.firefox = {
       enable = true;
-      package = pkgs.zenos.apps.browsers.firefox;
+      package = pkgs.zenos.byCategories.apps.browsers.firefox;
       policies = {
         DisableAccounts = true;
         DisableAppUpdate = true;
