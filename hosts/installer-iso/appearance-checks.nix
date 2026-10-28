@@ -72,6 +72,6 @@ pkgs.runCommand "zenos-live-appearance-contract" {
   ${python}/bin/python ${./test-appearance.py} \
     --generated "$out/generated.json" --expected "$out/expected.json" \
     --system ${live.system.path} --home ${home.home.activationPackage} --assets-only
-  test -s ${pkgs.zenos.byCategories.system.zenos-setup.src}/data/wallpapers/purple.png
+  test -s ${pkgs.zenos.byCategories.apps.system.zenos-setup.src}/data/wallpapers/purple.png
   test -f ${home.xdg.configFile."mozilla/firefox/default/chrome/gnome-theme".source}/userChrome.css
 ''

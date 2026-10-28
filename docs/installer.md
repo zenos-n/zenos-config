@@ -47,7 +47,7 @@ The live account has passwordless sudo. Root SSH login remains disabled.
   `zenos-setup --oobe`. Both Setup services set `ZENOS_SETUP_DRY_RUN=0` directly
   in their service environment. Starting the app must not
   install anything: partitioning and installation wait for the user's clicks.
-- Setup comes only from `pkgs.zenos.byCategories.system.zenos-setup`; the GNOME mode comes
+- Setup comes only from `pkgs.zenos.byCategories.apps.system.zenos-setup`; the GNOME mode comes
   only from `pkgs.zenos.byCategories.system.zenos-oobe-mode`. Setup must export
   `meta.mainProgram = "zenos-setup"`. The mode package must install
   `share/gnome-shell/modes/zenos-oobe.json` and extension UUID

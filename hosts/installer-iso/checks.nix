@@ -40,7 +40,7 @@ let
       map unpack value
     else
       value;
-  setup = pkgs.zenos.byCategories.system.zenos-setup;
+  setup = pkgs.zenos.byCategories.apps.system.zenos-setup;
   setupBuilderSource = builtins.readFile "${setup.src}/src/builder.py";
   setupRunnerSource = builtins.readFile "${setup.src}/src/runner.py";
   mode = pkgs.zenos.byCategories.system.zenos-oobe-mode;

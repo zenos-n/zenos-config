@@ -1,6 +1,6 @@
 { config, installerStage, lib, pkgs, ... }:
 let
-  wallpaper = "${pkgs.zenos.byCategories.system.zenos-setup.src}/data/wallpapers/purple.png";
+  wallpaper = "${pkgs.zenos.byCategories.apps.system.zenos-setup.src}/data/wallpapers/purple.png";
   firefoxGnomeTheme = pkgs.fetchFromGitHub {
     owner = "rafaelmardojai";
     repo = "firefox-gnome-theme";

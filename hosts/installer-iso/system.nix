@@ -13,7 +13,7 @@ let
       or (throw "ZenPkgs input must provide a Git revision for ZenOS versioning");
   zenpkgsHash = builtins.substring 0 7 zenpkgsRevision;
   displayVersion = "${releaseVersion} (${zenpkgsHash})";
-  setup = pkgs.zenos.byCategories.system.zenos-setup;
+  setup = pkgs.zenos.byCategories.apps.system.zenos-setup;
   mode = pkgs.zenos.byCategories.system.zenos-oobe-mode;
   sessionCommand = "${pkgs.coreutils}/bin/env XDG_SESSION_TYPE=wayland XDG_SESSION_CLASS=user XDG_SESSION_DESKTOP=GNOME XDG_CURRENT_DESKTOP=GNOME ZENOS_OOBE=1 ${config.services.displayManager.sessionData.wrapper} ${pkgs.gnome-session}/bin/gnome-session --session=zenos-oobe";
   normalUsers = lib.filterAttrs (_: user: user.enable && user.isNormalUser) config.users.users;
