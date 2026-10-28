@@ -948,11 +948,11 @@
         "vsc-extensions": "vsc-extensions"
       },
       "locked": {
-        "lastModified": 1793182746,
-        "narHash": "sha256-a6ke+/p2AI504MPwDUobU9+vUVQCpmQbsRdh1gOLvDU=",
+        "lastModified": 1793183025,
+        "narHash": "sha256-+/eds78N2Gg424e00An59+hIMZvm80T8DV24UPh4k10=",
         "owner": "zenos-n",
         "repo": "zenpkgs",
-        "rev": "ff425d32a4f627a5deb50ca4a5fd218b4180c822",
+        "rev": "4e7678b79a8118e68d2b11eb2f35eaa15592dc7e",
         "type": "github"
       },
       "original": {
