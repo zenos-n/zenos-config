@@ -202,7 +202,7 @@ in
     pkgs.zenos.byCategories.apps.system.zenos.zenos-rebuild
     setup
     mode
-    pkgs.zenos.byCategories.apps.terminal.blackbox-next
+    pkgs.zenos.byCategories.apps.terminal.blankbox
     pkgs.nautilus
   ];
   system.extraDependencies = [

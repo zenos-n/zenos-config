@@ -19,12 +19,12 @@ in
     ];
 
     home-manager.users.zenos = {
-      home.sessionVariables.TERMINAL = lib.mkDefault "${pkgs.zenos.byCategories.apps.terminal.blackbox-next}/bin/blackbox-next";
+      home.sessionVariables.TERMINAL = lib.mkDefault "${pkgs.zenos.byCategories.apps.terminal.blankbox}/bin/blankbox";
       xdg.terminal-exec = {
         enable = lib.mkDefault true;
         settings = {
-          default = lib.mkDefault [ "com.neg-zero.BlackBoxNext.desktop" ];
-          GNOME = lib.mkDefault [ "com.neg-zero.BlackBoxNext.desktop" ];
+          default = lib.mkDefault [ "com.neg-zero.Blankbox.desktop" ];
+          GNOME = lib.mkDefault [ "com.neg-zero.Blankbox.desktop" ];
         };
       };
       dconf.enable = true;
@@ -65,7 +65,7 @@ in
         ];
         "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/terminal" = {
           binding = "<Super>t";
-          command = "${pkgs.zenos.byCategories.apps.terminal.blackbox-next}/bin/blackbox-next";
+          command = "${pkgs.zenos.byCategories.apps.terminal.blankbox}/bin/blankbox";
           name = "Terminal";
         };
       };
