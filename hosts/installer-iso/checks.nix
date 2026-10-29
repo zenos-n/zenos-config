@@ -8,7 +8,9 @@
 let
   inherit (pkgs) lib;
   zenpkgsRevision =
-    inputs.zenpkgs.sourceInfo.rev
+    if builtins.pathExists (inputs.zenpkgs + "/.zenpkgs-revision") then
+      lib.removeSuffix "\n" (builtins.readFile (inputs.zenpkgs + "/.zenpkgs-revision"))
+    else inputs.zenpkgs.sourceInfo.rev
       or inputs.zenpkgs.sourceInfo.dirtyRev
       or (throw "ZenPkgs input must provide a Git revision for ZenOS versioning");
   zenpkgsHash = builtins.substring 0 7 zenpkgsRevision;
@@ -122,7 +124,7 @@ assert !live.security.sudo.wheelNeedsPassword;
 assert desktop.services.displayManager.gdm.enable;
 assert desktop.home-manager.users.alice.dconf.settings."org/gnome/mutter".auto-maximize == false;
 assert builtins.elem pkgs.zenos.byCategories.apps.ai.codex desktop.environment.systemPackages;
-assert pkgs.zenos.byCategories.apps.ai.codex.version == "0.164.0";
+assert pkgs.zenos.byCategories.apps.ai.codex.drvPath == pkgs.lib.zenPackageSources.unstablePackages.codex.drvPath;
 assert builtins.all (config:
   builtins.elem pkgs.zenos.byCategories.theming.system.zenos-branding config.environment.systemPackages
 ) [ oobe desktop kde headless ];

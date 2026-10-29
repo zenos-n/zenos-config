@@ -8,7 +8,9 @@
 let
   releaseVersion = "1.0.0Nb";
   zenpkgsRevision =
-    inputs.zenpkgs.sourceInfo.rev
+    if builtins.pathExists (inputs.zenpkgs + "/.zenpkgs-revision") then
+      lib.removeSuffix "\n" (builtins.readFile (inputs.zenpkgs + "/.zenpkgs-revision"))
+    else inputs.zenpkgs.sourceInfo.rev
       or inputs.zenpkgs.sourceInfo.dirtyRev
       or (throw "ZenPkgs input must provide a Git revision for ZenOS versioning");
   zenpkgsHash = builtins.substring 0 7 zenpkgsRevision;
@@ -37,6 +39,8 @@ in
     bootHooks.common
   ];
   zenos.system.installed-base.enable = false;
+  zenos.system.programs.gnosis = { enable = true; defaultBrowser = true; };
+  services.masterfulGestures = { enable = lib.mkDefault true; user = lib.mkDefault "zenos"; };
   zenos.system.zenfs.enable = true;
   nixpkgs.config.allowUnfree = true;
   system.stateVersion = "26.05";
@@ -54,6 +58,7 @@ in
       LOGO = "zenos";
       VERSION = displayVersion;
       VERSION_ID = releaseVersion;
+      VERSION_CODENAME = "";
       PRETTY_NAME = "ZenOS ${displayVersion}";
     };
     extraLSBReleaseArgs = {
@@ -191,12 +196,13 @@ in
     };
   };
   environment.systemPackages = [
+    pkgs.zenos.byCategories.theming.system.fastfetch
     inputs.zenpkgs.packages.x86_64-linux.zen-dsl
     pkgs.nixos-rebuild
     pkgs.zenos.byCategories.apps.system.zenos.zenos-rebuild
     setup
     mode
-    pkgs.gnome-console
+    pkgs.zenos.byCategories.apps.terminal.blackbox-next
     pkgs.nautilus
   ];
   system.extraDependencies = [

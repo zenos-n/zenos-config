@@ -9,7 +9,9 @@
 }:
 let
   zenpkgsRevision =
-    inputs.zenpkgs.sourceInfo.rev
+    if builtins.pathExists (inputs.zenpkgs + "/.zenpkgs-revision") then
+      lib.removeSuffix "\n" (builtins.readFile (inputs.zenpkgs + "/.zenpkgs-revision"))
+    else inputs.zenpkgs.sourceInfo.rev
       or inputs.zenpkgs.sourceInfo.dirtyRev
       or (throw "ZenPkgs input must provide a Git revision for ZenOS versioning");
   zenpkgsHash = builtins.substring 0 7 zenpkgsRevision;

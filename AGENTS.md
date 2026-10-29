@@ -1,5 +1,8 @@
 # ZenOS Implementation Rules
 
+Port reusable fixes made on the installed ZenOS system to the canonical upstream
+repositories as part of the same task; do not leave them only in `/Config/ZenOS`.
+
 Before editing this repository, read the relevant design in the sibling
 `/home/doromiert/Projects/zenos-n-next` checkout. That repository is the
 normative authority for ZenOS architecture and DSL behavior.
@@ -18,4 +21,3 @@ normative authority for ZenOS architecture and DSL behavior.
 - ZenOS has one module/configuration graph; Home Manager is only an internal
   lowering backend for user-scoped actions.
 - Package source and assets belong to one external repository per package.
-- Runtime tests and integration acceptance must run in a ZenOS VM.
